@@ -49,7 +49,7 @@ class OpenAIVoiceService:
         await self.ws.send(json.dumps({
             "type": "response.create",
             "response": {
-                "instructions": "Kendini Görkem olarak tanıt. Samimi ol. Sağlık sigortası hakkında yardımcı olmak istediğini söyle."
+                "instructions": "Beginne das Gespräch sofort auf Deutsch mit der Einleitung aus Schritt 1 deines Leitfadens. Sag genau: 'Einen wunderschönen guten Tag, mein Name ist Kalmaz vom Verbund der Privat Krankenversicherten...'"
             }
         }))
 
