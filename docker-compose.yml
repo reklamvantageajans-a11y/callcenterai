@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  voice-assistant:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: openai-realtime-voice-assistant
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.voice-assistant.rule=Host(`${DOMAIN_NAME:-localhost}`)"
+      - "traefik.http.routers.voice-assistant.entrypoints=websecure"
+      - "traefik.http.routers.voice-assistant.tls.certresolver=letsencrypt"
+      - "traefik.http.services.voice-assistant.loadbalancer.server.port=8000"
