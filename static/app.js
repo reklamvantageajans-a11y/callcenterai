@@ -177,32 +177,44 @@ function toggleMute() {
 // ── AUDIO PLAYBACK (gapless queue) ──
 function playChunk(b64) {
   if (!audioCtx) return;
-  const raw = atob(b64);
-  const pcm16 = new Int16Array(raw.length / 2);
-  for (let i = 0; i < pcm16.length; i++) {
-    pcm16[i] = raw.charCodeAt(i * 2) | (raw.charCodeAt(i * 2 + 1) << 8);
+  if (audioCtx.state === 'suspended') {
+    audioCtx.resume();
   }
-  const float32 = new Float32Array(pcm16.length);
-  for (let i = 0; i < pcm16.length; i++) {
-    float32[i] = pcm16[i] / 32768;
+  
+  try {
+    const raw = atob(b64);
+    const pcm16 = new Int16Array(raw.length / 2);
+    for (let i = 0; i < pcm16.length; i++) {
+      const lsb = raw.charCodeAt(i * 2);
+      const msb = raw.charCodeAt(i * 2 + 1);
+      let val = (msb << 8) | lsb;
+      if (val >= 0x8000) val -= 0x10000;
+      pcm16[i] = val;
+    }
+    const float32 = new Float32Array(pcm16.length);
+    for (let i = 0; i < pcm16.length; i++) {
+      float32[i] = pcm16[i] / 32768;
+    }
+
+    const buf = audioCtx.createBuffer(1, float32.length, 24000);
+    buf.getChannelData(0).set(float32);
+    const src = audioCtx.createBufferSource();
+    src.buffer = buf;
+    src.connect(audioCtx.destination);
+
+    const now = audioCtx.currentTime;
+    const startAt = Math.max(now, nextPlayTime);
+    src.start(startAt);
+    nextPlayTime = startAt + buf.duration;
+
+    activeSources.push(src);
+    src.onended = () => {
+      const idx = activeSources.indexOf(src);
+      if (idx !== -1) activeSources.splice(idx, 1);
+    };
+  } catch (e) {
+    console.error("Audio playback error:", e);
   }
-
-  const buf = audioCtx.createBuffer(1, float32.length, 24000);
-  buf.getChannelData(0).set(float32);
-  const src = audioCtx.createBufferSource();
-  src.buffer = buf;
-  src.connect(audioCtx.destination);
-
-  const now = audioCtx.currentTime;
-  const startAt = Math.max(now, nextPlayTime);
-  src.start(startAt);
-  nextPlayTime = startAt + buf.duration;
-
-  activeSources.push(src);
-  src.onended = () => {
-    const idx = activeSources.indexOf(src);
-    if (idx !== -1) activeSources.splice(idx, 1);
-  };
 }
 
 function flushAudio() {
