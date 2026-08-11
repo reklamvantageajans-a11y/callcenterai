@@ -65,6 +65,16 @@ async function startCall() {
   ws.onopen = () => {
     setState('listening', 'Bağlandı');
     startMic();
+    
+    // Test beep to confirm audio works
+    try {
+      const osc = audioCtx.createOscillator();
+      osc.frequency.value = 440;
+      osc.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.1);
+    } catch(e) {}
+
     pingTimer = setInterval(() => {
       if (ws && ws.readyState === 1) {
         ws.send(JSON.stringify({ event: 'ping', ts: Date.now() }));
@@ -192,9 +202,13 @@ function playChunk(b64) {
       pcm16[i] = val;
     }
     const float32 = new Float32Array(pcm16.length);
+    let sumSquares = 0;
     for (let i = 0; i < pcm16.length; i++) {
       float32[i] = pcm16[i] / 32768;
+      sumSquares += float32[i] * float32[i];
     }
+    const rms = Math.sqrt(sumSquares / float32.length);
+    console.log("Audio chunk RMS volume:", rms);
 
     const buf = audioCtx.createBuffer(1, float32.length, 24000);
     buf.getChannelData(0).set(float32);
