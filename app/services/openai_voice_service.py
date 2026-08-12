@@ -45,12 +45,13 @@ class OpenAIVoiceService:
                 "audio": {
                     "input": {
                         "format": {"type": "audio/pcm", "rate": 24000},
-                        # semantic_vad: model decides when the user actually finished
-                        # their sentence -> far more human-like turn taking.
-                        # "low" eagerness = wait longer, don't cut the customer off.
+                        # server_vad restored: steadier turn-taking, fewer false
+                        # interruptions / awkward silences than semantic_vad here.
                         "turn_detection": {
-                            "type": "semantic_vad",
-                            "eagerness": "medium",
+                            "type": "server_vad",
+                            "threshold": 0.5,
+                            "prefix_padding_ms": 300,
+                            "silence_duration_ms": 400,
                             "create_response": True,
                             "interrupt_response": True
                         }
@@ -87,8 +88,8 @@ class OpenAIVoiceService:
             "response": {
                 "instructions": (
                     "Beginne das Gespräch jetzt auf Deutsch mit der Begrüßung aus Schritt 1 "
-                    "deines Leitfadens. Sprich locker und natürlich, in kurzen Sätzen mit "
-                    "kleinen Atempausen - NICHT alles in einem Atemzug herunterrattern. "
+                    "deines Leitfadens. Sprich locker, warm und natürlich fließend - in einem "
+                    "angenehmen, zusammenhängenden Gesprächston, nicht abgehackt. "
                     "Starte mit: 'Einen wunderschönen guten Tag, mein Name ist Kalmaz "
                     "vom Verbund der Privat Krankenversicherten.'"
                 )
