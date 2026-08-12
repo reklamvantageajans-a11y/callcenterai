@@ -23,6 +23,7 @@ class Session:
         self.ai = OpenAIVoiceService(system_prompt=self._prompt())
         self.alive = False
         self.task = None
+        self.last_item_id = None
 
     def _prompt(self):
         p = os.path.join("config", "system_prompt.txt")
@@ -71,6 +72,9 @@ class Session:
                     ev = msg.get("event")
                     if ev == "ping":
                         await self.send({"event": "pong", "ts": msg.get("ts")})
+                    elif ev == "interrupt":
+                        ms = msg.get("ms", 0)
+                        await self.ai.truncate(self.last_item_id, ms)
         except (WebSocketDisconnect, RuntimeError):
             pass
         except Exception as e:
@@ -92,6 +96,9 @@ class Session:
             # Audio delta
             if "audio" in t and "delta" in t and "transcript" not in t:
                 d = ev.get("delta", "")
+                item_id = ev.get("item_id")
+                if item_id:
+                    self.last_item_id = item_id
                 if d:
                     audio_chunks += 1
                     if audio_chunks <= 3:
@@ -135,7 +142,13 @@ class Session:
                            "response.content_part.added", "response.content_part.done",
                            "response.output_item.done", "rate_limits.updated",
                            "input_audio_buffer.committed", "input_audio_buffer.cleared",
-                           "conversation.item.created"):
+                           "conversation.item.created", "conversation.item.added",
+                           "conversation.item.done", "conversation.item.truncated",
+                           "response.cancelled",
+                           "conversation.item.input_audio_transcription.delta",
+                           "conversation.item.input_audio_transcription.completed",
+                           "response.output_audio.done",
+                           "response.output_audio_transcript.done"):
                 print(f"[AI] unhandled: {t}")
 
 @app.websocket("/ws/voice")

@@ -4,13 +4,19 @@
 let ws = null;
 let audioCtx = null;
 let mediaStream = null;
-let processor = null;
+let micNode = null;
+let micSource = null;
 let isMuted = false;
 let isActive = false;
 let nextPlayTime = 0;
+let playbackStart = null;   // ctx time when current response playback begins
 let activeSources = [];
 let currentBubble = null;
 let pingTimer = null;
+
+// Small jitter buffer: delay the first chunk of each response slightly so
+// network hiccups don't cause clicks/gaps mid-sentence.
+const JITTER_BUFFER = 0.12;
 
 const orb = document.getElementById('orb');
 const orbLabel = document.getElementById('orb-label');
@@ -68,18 +74,9 @@ async function startCall() {
   ws = new WebSocket(`${proto}://${location.host}/ws/voice`);
   ws.binaryType = 'arraybuffer';
 
-  ws.onopen = () => {
+  ws.onopen = async () => {
     setState('listening', 'Bağlandı');
-    startMic();
-    
-    // Test beep to confirm audio works
-    try {
-      const osc = audioCtx.createOscillator();
-      osc.frequency.value = 440;
-      osc.connect(audioCtx.destination);
-      osc.start();
-      osc.stop(audioCtx.currentTime + 0.1);
-    } catch(e) {}
+    await startMic();
 
     pingTimer = setInterval(() => {
       if (ws && ws.readyState === 1) {
@@ -110,8 +107,11 @@ async function startCall() {
       case 'done':
         setState('listening', 'Dinliyor');
         currentBubble = null;
+        playbackStart = null;
+        nextPlayTime = 0;
         break;
       case 'speech_start':
+        reportInterrupt();
         flushAudio();
         setState('listening', 'Dinliyor');
         currentBubble = null;
@@ -153,34 +153,49 @@ function endCall() {
   currentBubble = null;
 }
 
-// ── MICROPHONE ──
-function startMic() {
+// ── MICROPHONE (AudioWorklet — off main thread, low latency) ──
+async function startMic() {
   if (!audioCtx || !mediaStream) return;
-  const source = audioCtx.createMediaStreamSource(mediaStream);
-  processor = audioCtx.createScriptProcessor(2048, 1, 1);
+  try {
+    await audioCtx.audioWorklet.addModule('/static/pcm-worklet.js');
+  } catch (e) {
+    console.error('Worklet load failed:', e);
+    return;
+  }
+  micSource = audioCtx.createMediaStreamSource(mediaStream);
+  micNode = new AudioWorkletNode(audioCtx, 'pcm-processor');
 
-  processor.onaudioprocess = (e) => {
+  micNode.port.onmessage = (e) => {
     if (!ws || ws.readyState !== 1 || isMuted) return;
-    const float32 = e.inputBuffer.getChannelData(0);
-    const pcm16 = new Int16Array(float32.length);
-    for (let i = 0; i < float32.length; i++) {
-      const s = Math.max(-1, Math.min(1, float32[i]));
-      pcm16[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
-    }
-    ws.send(pcm16.buffer);
+    ws.send(e.data);
   };
 
-  source.connect(processor);
-  processor.connect(audioCtx.destination);
+  micSource.connect(micNode);
+  // Worklet has no audible output; connect to keep the graph pulling audio.
+  micNode.connect(audioCtx.destination);
   connDot.style.background = '#00d4aa';
   connDot.style.boxShadow = '0 0 8px #00d4aa';
 }
 
 function stopMic() {
-  if (processor) { processor.disconnect(); processor = null; }
+  if (micNode) { try { micNode.port.onmessage = null; micNode.disconnect(); } catch {} micNode = null; }
+  if (micSource) { try { micSource.disconnect(); } catch {} micSource = null; }
   if (mediaStream) {
     mediaStream.getTracks().forEach(t => t.stop());
     mediaStream = null;
+  }
+}
+
+// Tell the server how much of the assistant's audio was actually heard, so it
+// can truncate the rest and keep the conversation coherent after a barge-in.
+function reportInterrupt() {
+  if (!audioCtx || playbackStart === null) return;
+  let playedMs = (audioCtx.currentTime - playbackStart) * 1000;
+  const totalMs = (nextPlayTime - playbackStart) * 1000;
+  if (playedMs < 0) playedMs = 0;
+  if (playedMs > totalMs) playedMs = totalMs;
+  if (ws && ws.readyState === 1) {
+    ws.send(JSON.stringify({ event: 'interrupt', ms: Math.round(playedMs) }));
   }
 }
 
@@ -214,8 +229,7 @@ function playChunk(b64) {
       sumSquares += float32[i] * float32[i];
     }
     const rms = Math.sqrt(sumSquares / float32.length);
-    console.log("Audio chunk RMS volume:", rms);
-    
+
     if (orb) {
       orb.style.setProperty('--orb-scale', 1 + (rms * 3.5));
       setTimeout(() => {
@@ -230,7 +244,14 @@ function playChunk(b64) {
     src.connect(audioCtx.destination);
 
     const now = audioCtx.currentTime;
-    const startAt = Math.max(now, nextPlayTime);
+    let startAt;
+    if (playbackStart === null || nextPlayTime <= now) {
+      // First chunk of a fresh response: add a small jitter buffer.
+      startAt = now + JITTER_BUFFER;
+      playbackStart = startAt;
+    } else {
+      startAt = nextPlayTime;
+    }
     src.start(startAt);
     nextPlayTime = startAt + buf.duration;
 
@@ -250,6 +271,7 @@ function flushAudio() {
   });
   activeSources = [];
   nextPlayTime = 0;
+  playbackStart = null;
 }
 
 // ── TRANSCRIPT ──
