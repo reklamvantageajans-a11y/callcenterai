@@ -215,6 +215,13 @@ function playChunk(b64) {
     }
     const rms = Math.sqrt(sumSquares / float32.length);
     console.log("Audio chunk RMS volume:", rms);
+    
+    if (orb) {
+      orb.style.setProperty('--orb-scale', 1 + (rms * 3.5));
+      setTimeout(() => {
+        if (orb) orb.style.setProperty('--orb-scale', 1);
+      }, 150);
+    }
 
     const buf = audioCtx.createBuffer(1, float32.length, 24000);
     buf.getChannelData(0).set(float32);

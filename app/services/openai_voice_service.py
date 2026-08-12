@@ -38,8 +38,16 @@ class OpenAIVoiceService:
         await self.ws.send(json.dumps({
             "type": "session.update",
             "session": {
-                "type": "realtime",
-                "instructions": self.system_prompt
+                "modalities": ["text", "audio"],
+                "instructions": self.system_prompt,
+                "voice": self.voice,
+                "temperature": 0.7,
+                "turn_detection": {
+                    "type": "server_vad",
+                    "threshold": 0.5,
+                    "prefix_padding_ms": 300,
+                    "silence_duration_ms": 400
+                }
             }
         }))
 

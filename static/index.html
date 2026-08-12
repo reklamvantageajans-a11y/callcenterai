@@ -91,10 +91,11 @@
         inset 0 0 40px rgba(255,255,255,0.05);
       transition:transform .6s cubic-bezier(.23,1,.32,1), box-shadow .6s;
       animation:orb-breathe 4s ease-in-out infinite;
+      transform: scale(var(--orb-scale, 1));
     }
     @keyframes orb-breathe {
-      0%,100%{transform:scale(1)}
-      50%{transform:scale(1.03)}
+      0%,100%{transform:scale(var(--orb-scale, 1))}
+      50%{transform:scale(calc(var(--orb-scale, 1) * 1.03))}
     }
     #orb.listening {
       animation:orb-listen .8s ease-in-out infinite alternate;
@@ -106,12 +107,9 @@
       100%{transform:scale(1.08)}
     }
     #orb.speaking {
-      animation:orb-speak .4s ease-in-out infinite alternate;
       box-shadow:0 0 80px rgba(108,99,255,.4), 0 0 160px rgba(108,99,255,.15);
-    }
-    @keyframes orb-speak {
-      0%{transform:scale(1)}
-      100%{transform:scale(1.12)}
+      transition: transform 0.1s cubic-bezier(.25, .8, .25, 1), box-shadow .6s;
+      animation: none;
     }
     #orb.thinking {
       animation:orb-think 1.5s ease-in-out infinite;
