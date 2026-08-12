@@ -50,7 +50,7 @@ class OpenAIVoiceService:
                         # "low" eagerness = wait longer, don't cut the customer off.
                         "turn_detection": {
                             "type": "semantic_vad",
-                            "eagerness": "low",
+                            "eagerness": "medium",
                             "create_response": True,
                             "interrupt_response": True
                         }
