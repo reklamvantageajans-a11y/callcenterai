@@ -18,15 +18,17 @@ async def index():
     return FileResponse("static/index.html")
 
 class Session:
-    def __init__(self, ws: WebSocket):
+    def __init__(self, ws: WebSocket, lang: str = "de"):
         self.ws = ws
+        self.lang = lang
         self.ai = OpenAIVoiceService(system_prompt=self._prompt())
         self.alive = False
         self.task = None
         self.last_item_id = None
 
     def _prompt(self):
-        p = os.path.join("config", "system_prompt.txt")
+        filename = "system_prompt_tr.txt" if self.lang == "tr" else "system_prompt.txt"
+        p = os.path.join("config", filename)
         if os.path.exists(p):
             return open(p, "r", encoding="utf-8").read().strip()
         return ""
@@ -152,6 +154,6 @@ class Session:
                 print(f"[AI] unhandled: {t}")
 
 @app.websocket("/ws/voice")
-async def ws_voice(websocket: WebSocket):
-    s = Session(websocket)
+async def ws_voice(websocket: WebSocket, lang: str = "de"):
+    s = Session(websocket, lang=lang)
     await s.run()

@@ -87,11 +87,10 @@ class OpenAIVoiceService:
             "type": "response.create",
             "response": {
                 "instructions": (
-                    "Beginne das Gespräch jetzt auf Deutsch mit der Begrüßung aus Schritt 1 "
-                    "deines Leitfadens. Sprich locker, warm und natürlich fließend - in einem "
-                    "angenehmen, zusammenhängenden Gesprächston, nicht abgehackt. "
-                    "Starte mit: 'Einen wunderschönen guten Tag, mein Name ist Kalmaz "
-                    "vom Verbund der Privat Krankenversicherten.'"
+                    "Start the conversation now by delivering your Step 1 / Adım 1 opening "
+                    "greeting exactly as defined in your system prompt. Speak warmly and "
+                    "naturally — not like you are reading from a script. Use the language "
+                    "of your system prompt."
                 )
             }
         }))

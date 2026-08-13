@@ -160,11 +160,39 @@
     footer {
       padding:16px 24px;
       display:flex;
+      flex-direction:column;
       align-items:center;
       justify-content:center;
-      gap:16px;
+      gap:12px;
       border-top:1px solid var(--border);
       flex-shrink:0;
+    }
+    #lang-picker {
+      display:flex;
+      gap:6px;
+    }
+    .lang-btn {
+      background:var(--surface);
+      border:1px solid var(--border);
+      color:var(--muted);
+      border-radius:20px;
+      padding:5px 14px;
+      font-size:12px;
+      font-weight:500;
+      cursor:pointer;
+      transition:all .2s;
+      font-family:inherit;
+    }
+    .lang-btn:hover  { border-color:#6b6b80; color:var(--text); }
+    .lang-btn.active {
+      border-color:var(--accent2);
+      color:var(--accent2);
+      background:rgba(0,212,170,.08);
+    }
+    .btn-row {
+      display:flex;
+      align-items:center;
+      gap:16px;
     }
     .btn {
       width:52px; height:52px;
@@ -254,12 +282,18 @@
   </main>
 
   <footer>
+    <div id="lang-picker" style="display:flex;gap:8px;margin-bottom:4px;">
+      <button id="btn-de" class="lang-btn active" onclick="setLang('de')">🇩🇪 DE</button>
+      <button id="btn-tr" class="lang-btn"        onclick="setLang('tr')">🇹🇷 TR</button>
+    </div>
+    <div class="btn-row">
     <button class="btn" id="btn-mute" onclick="toggleMute()" style="display:none">
       <svg viewBox="0 0 24 24"><path d="M12 14a3 3 0 003-3V5a3 3 0 00-6 0v6a3 3 0 003 3zm5-3a5 5 0 01-10 0H5a7 7 0 0014 0h-2zm-5 9a1 1 0 01-1-1h2a1 1 0 01-1 1z"/></svg>
     </button>
     <button class="btn" id="btn-call" onclick="toggleCall()">
       <svg viewBox="0 0 24 24"><path d="M6.62 10.79a15.05 15.05 0 006.59 6.59l2.2-2.2a1 1 0 011.11-.27 11.36 11.36 0 003.53.56 1 1 0 011 1V20a1 1 0 01-1 1A17 17 0 013 4a1 1 0 011-1h3.5a1 1 0 011 1 11.36 11.36 0 00.56 3.53 1 1 0 01-.27 1.11z"/></svg>
     </button>
+    </div>
   </footer>
   <div id="ping"></div>
   <script src="/static/app.js"></script>

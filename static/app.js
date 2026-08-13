@@ -13,6 +13,7 @@ let playbackStart = null;   // ctx time when current response playback begins
 let activeSources = [];
 let currentBubble = null;
 let pingTimer = null;
+let selectedLang = 'de';
 
 // Small jitter buffer: delay the first chunk of each response slightly so
 // network hiccups don't cause clicks/gaps mid-sentence.
@@ -36,6 +37,16 @@ function setState(state, label) {
   if (state === 'listening') statusText.classList.add('active');
   else if (state === 'speaking') statusText.classList.add('speaking');
   else if (state === 'thinking') statusText.classList.add('thinking');
+}
+
+// ── LANGUAGE PICKER ──
+function setLang(lang) {
+  if (isActive) return; // don't switch mid-call
+  selectedLang = lang;
+  document.getElementById('btn-de').classList.toggle('active', lang === 'de');
+  document.getElementById('btn-tr').classList.toggle('active', lang === 'tr');
+  const label = lang === 'tr' ? 'Başlamak için dokunun' : 'Zum Starten tippen';
+  orbLabel.textContent = label;
 }
 
 // ── CALL TOGGLE ──
@@ -67,11 +78,12 @@ async function startCall() {
   isActive = true;
   btnCall.classList.add('active');
   btnMute.style.display = 'flex';
-  setState('', 'Bağlanıyor...');
+  document.getElementById('lang-picker').style.display = 'none';
+  setState('', selectedLang === 'tr' ? 'Bağlanıyor...' : 'Verbinde...');
 
   // WebSocket
   const proto = location.protocol === 'https:' ? 'wss' : 'ws';
-  ws = new WebSocket(`${proto}://${location.host}/ws/voice`);
+  ws = new WebSocket(`${proto}://${location.host}/ws/voice?lang=${selectedLang}`);
   ws.binaryType = 'arraybuffer';
 
   ws.onopen = async () => {
@@ -145,9 +157,10 @@ function endCall() {
   if (audioCtx) { audioCtx.close(); audioCtx = null; }
   btnCall.classList.remove('active');
   btnMute.style.display = 'none';
+  document.getElementById('lang-picker').style.display = 'flex';
   isMuted = false;
   btnMute.classList.remove('muted');
-  setState('', 'Başlamak için dokunun');
+  setState('', selectedLang === 'tr' ? 'Aramak için dokun' : 'Zum Starten tippen');
   connDot.style.background = '#6b6b80';
   connDot.style.boxShadow = 'none';
   currentBubble = null;
