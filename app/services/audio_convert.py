@@ -1,4 +1,7 @@
-import audioop
+try:
+    import audioop
+except ModuleNotFoundError:
+    import audioop_lts as audioop
 import base64
 
 
