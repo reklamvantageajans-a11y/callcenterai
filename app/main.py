@@ -2,11 +2,12 @@ import os
 import json
 import asyncio
 from dotenv import load_dotenv
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
-from starlette.websockets import WebSocketState
+from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
+from fastapi.responses import FileResponse, Response, JSONResponse
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from starlette.websockets import WebSocketState
 from app.services.openai_voice_service import OpenAIVoiceService
+from app.services.twilio_bridge import TwilioSession, load_prompt
 
 load_dotenv()
 
@@ -17,21 +18,70 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 async def index():
     return FileResponse("static/index.html")
 
+def public_base(request: Request) -> str:
+    env = (os.getenv("PUBLIC_URL") or os.getenv("RENDER_EXTERNAL_URL") or "https://callcenterai-yxqp.onrender.com").rstrip("/")
+    if env:
+        return env
+    proto = request.headers.get("x-forwarded-proto", request.url.scheme)
+    host = request.headers.get("x-forwarded-host") or request.headers.get("host")
+    return f"{proto}://{host}"
+
+@app.api_route("/twilio/voice", methods=["GET", "POST"])
+async def twilio_voice(request: Request, lang: str = "de"):
+    await request.body()
+    lang = lang if lang in ("tr", "de") else "de"
+    base_url = public_base(request)
+    proto = "wss" if base_url.startswith("https") else "ws"
+    host = base_url.split("://", 1)[-1]
+    stream_url = f"{proto}://{host}/twilio/media?lang={lang}"
+    xml = (
+        '<?xml version="1.0" encoding="UTF-8"?>'
+        "<Response><Connect>"
+        f'<Stream url="{stream_url}">'
+        f'<Parameter name="lang" value="{lang}" />'
+        "</Stream></Connect></Response>"
+    )
+    print(f"[Twilio] TwiML stream={stream_url}")
+    return Response(content=xml, media_type="text/xml")
+
+@app.websocket("/twilio/media")
+async def twilio_media(websocket: WebSocket):
+    lang = websocket.query_params.get("lang", "de")
+    try:
+        await TwilioSession(websocket, lang=lang).run()
+    except Exception as exc:
+        import traceback
+        print(f"[twilio/media] HATA lang={lang}: {exc}")
+        traceback.print_exc()
+
+@app.post("/twilio/call")
+async def twilio_call(request: Request):
+    secret = os.getenv("CALL_SECRET", "")
+    if not secret or request.headers.get("x-call-secret") != secret:
+        return JSONResponse({"error": "unauthorized"}, status_code=401)
+    sid = os.getenv("TWILIO_ACCOUNT_SID", "")
+    token = os.getenv("TWILIO_AUTH_TOKEN", "")
+    frm = os.getenv("TWILIO_PHONE_NUMBER", "")
+    if not (sid and token and frm):
+        return JSONResponse({"error": "twilio env missing"}, status_code=500)
+    body = await request.json()
+    to = body.get("to")
+    lang = body.get("lang", "de")
+    if not to:
+        return JSONResponse({"error": "to required"}, status_code=400)
+    from twilio.rest import Client
+    voice_url = f"{public_base(request)}/twilio/voice?lang={lang}"
+    call = Client(sid, token).calls.create(to=to, from_=frm, url=voice_url)
+    return {"sid": call.sid, "status": call.status}
+
 class Session:
     def __init__(self, ws: WebSocket, lang: str = "de"):
         self.ws = ws
         self.lang = lang
-        self.ai = OpenAIVoiceService(system_prompt=self._prompt())
+        self.ai = OpenAIVoiceService(system_prompt=load_prompt(lang))
         self.alive = False
         self.task = None
         self.last_item_id = None
-
-    def _prompt(self):
-        filename = "system_prompt_tr.txt" if self.lang == "tr" else "system_prompt.txt"
-        p = os.path.join("config", filename)
-        if os.path.exists(p):
-            return open(p, "r", encoding="utf-8").read().strip()
-        return ""
 
     async def send(self, data):
         try:
