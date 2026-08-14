@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin — Arama</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: Inter, system-ui, sans-serif;
+      background: #f7f8fa;
+      color: #1a1d23;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .card {
+      width: min(420px, 100%);
+      background: #fff;
+      border: 1px solid #e8eaed;
+      border-radius: 16px;
+      padding: 28px 24px;
+    }
+    h1 { font-size: 18px; font-weight: 650; margin-bottom: 4px; }
+    p { font-size: 13px; color: #8a909d; margin-bottom: 22px; }
+    label { display:block; font-size: 12px; font-weight: 600; color: #40444f; margin: 14px 0 6px; }
+    input, select {
+      width: 100%;
+      border: 1px solid #e8eaed;
+      border-radius: 10px;
+      padding: 11px 12px;
+      font: inherit;
+      font-size: 14px;
+      background: #fff;
+    }
+    input:focus, select:focus { outline: 2px solid #1a3560; border-color: #1a3560; }
+    button {
+      width: 100%;
+      margin-top: 20px;
+      border: none;
+      border-radius: 10px;
+      padding: 12px;
+      background: #0f7c4b;
+      color: #fff;
+      font: inherit;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    button:disabled { opacity: .55; cursor: default; }
+    #msg { margin-top: 14px; font-size: 13px; min-height: 18px; }
+    .ok { color: #0f7c4b; }
+    .err { color: #c0392b; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Dış arama</h1>
+    <p>Numarayı girin, ajan arar. Gelen hat değişmez.</p>
+    <label for="secret">Şifre (CALL_SECRET)</label>
+    <input id="secret" type="password" autocomplete="current-password">
+    <label for="to">Aranacak numara</label>
+    <input id="to" type="tel" placeholder="+4917..." inputmode="tel">
+    <label for="lang">Dil</label>
+    <select id="lang">
+      <option value="de">Almanca</option>
+      <option value="tr">Türkçe</option>
+    </select>
+    <button id="btn" onclick="placeCall()">Ara</button>
+    <div id="msg"></div>
+  </div>
+  <script>
+    async function placeCall() {
+      const btn = document.getElementById('btn');
+      const msg = document.getElementById('msg');
+      const secret = document.getElementById('secret').value.trim();
+      let to = document.getElementById('to').value.replace(/[\s()-]/g, '');
+      const lang = document.getElementById('lang').value;
+      msg.className = '';
+      msg.textContent = '';
+      if (!secret || !to) {
+        msg.className = 'err';
+        msg.textContent = 'Şifre ve numara gerekli.';
+        return;
+      }
+      if (!to.startsWith('+')) to = '+' + to.replace(/^00/, '');
+      btn.disabled = true;
+      btn.textContent = 'Aranıyor...';
+      try {
+        const res = await fetch('/twilio/call', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-call-secret': secret },
+          body: JSON.stringify({ to, lang })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          msg.className = 'err';
+          msg.textContent = data.error === 'unauthorized' ? 'Şifre hatalı.' : (data.error || 'Arama başlatılamadı.');
+        } else {
+          msg.className = 'ok';
+          msg.textContent = 'Arama başladı. Karşı taraf açınca ajan konuşur.';
+        }
+      } catch (e) {
+        msg.className = 'err';
+        msg.textContent = 'Bağlantı hatası.';
+      }
+      btn.disabled = false;
+      btn.textContent = 'Ara';
+    }
+  </script>
+</body>
+</html>

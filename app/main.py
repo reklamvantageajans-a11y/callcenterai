@@ -18,6 +18,10 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 async def index():
     return FileResponse("static/index.html")
 
+@app.get("/admin")
+async def admin():
+    return FileResponse("static/admin.html")
+
 def public_base(request: Request) -> str:
     env = (os.getenv("PUBLIC_URL") or os.getenv("RENDER_EXTERNAL_URL") or "https://callcenterai-yxqp.onrender.com").rstrip("/")
     if env:
@@ -67,8 +71,12 @@ async def twilio_call(request: Request):
     body = await request.json()
     to = body.get("to")
     lang = body.get("lang", "de")
-    if not to:
-        return JSONResponse({"error": "to required"}, status_code=400)
+    to = "".join(ch for ch in str(to) if ch.isdigit() or ch == "+")
+    if to.startswith("00"):
+        to = "+" + to[2:]
+    if not to.startswith("+"):
+        return JSONResponse({"error": "to must be E.164 like +49..."}, status_code=400)
+    lang = lang if lang in ("tr", "de") else "de"
     from twilio.rest import Client
     voice_url = f"{public_base(request)}/twilio/voice?lang={lang}"
     call = Client(sid, token).calls.create(to=to, from_=frm, url=voice_url)
