@@ -3,119 +3,190 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin — Arama</title>
+  <title>Callcenter Kontrollpanel</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    * { margin:0; padding:0; box-sizing:border-box; }
-    body { font-family: Inter, system-ui, sans-serif; background:#f7f8fa; color:#1a1d23; min-height:100vh; padding:24px; }
-    .wrap { max-width:1100px; margin:0 auto; display:grid; gap:20px; grid-template-columns: minmax(280px, 340px) 1fr; }
-    @media (max-width:860px) { .wrap { grid-template-columns:1fr; } }
-    .card { background:#fff; border:1px solid #e8eaed; border-radius:16px; padding:22px; }
-    h1 { font-size:18px; font-weight:650; margin-bottom:4px; }
-    .sub { font-size:13px; color:#8a909d; margin-bottom:16px; }
-    label { display:block; font-size:12px; font-weight:600; color:#40444f; margin:12px 0 6px; }
-    input, select { width:100%; border:1px solid #e8eaed; border-radius:10px; padding:11px 12px; font:inherit; font-size:14px; }
-    button.primary { width:100%; margin-top:16px; border:none; border-radius:10px; padding:12px; background:#0f7c4b; color:#fff; font:inherit; font-weight:600; cursor:pointer; }
-    button.primary:disabled { opacity:.55; }
-    #msg { margin-top:12px; font-size:13px; min-height:18px; }
-    .ok { color:#0f7c4b; } .err { color:#c0392b; }
-    .call { border:1px solid #e8eaed; border-radius:12px; padding:12px; margin-bottom:10px; cursor:pointer; }
-    .call:hover, .call.on { border-color:#1a3560; background:#f8fafc; }
-    .num { font-family: ui-monospace, monospace; font-size:13px; font-weight:600; }
-    .meta { font-size:12px; color:#8a909d; margin-top:4px; }
-    .turn { margin:8px 0; padding:10px 12px; border-radius:10px; font-size:13.5px; line-height:1.45; }
-    .turn.agent { background:#f1f5f9; }
-    .turn.user { background:#ecfdf5; }
-    .who { font-size:11px; font-weight:600; color:#64748b; margin-bottom:4px; }
-    audio { width:100%; margin-top:10px; }
+    :root {
+      --bg:#f1f5f9; --surface:#fff; --surface2:#f8fafc; --border:#e2e8f0;
+      --muted:#94a3b8; --subtle:#64748b; --text:#0f172a;
+      --side:#1e293b; --sideActive:#334155; --brand:#4f46e5;
+      --success:#16a34a; --danger:#dc2626;
+    }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:Inter,system-ui,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; display:flex; }
+    aside { width:240px; background:var(--side); color:#cbd5e1; display:flex; flex-direction:column; flex-shrink:0; min-height:100vh; }
+    .logo { display:flex; gap:12px; align-items:center; padding:24px 20px; }
+    .mark { width:36px; height:36px; border-radius:8px; background:var(--brand); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px; }
+    .logo strong { display:block; color:#fff; font-size:14px; }
+    .logo span { font-size:11px; color:#64748b; }
+    nav { flex:1; padding:0 12px; }
+    nav button { width:100%; text-align:left; background:transparent; border:none; color:#94a3b8; padding:10px 12px; border-radius:8px; font:inherit; font-size:14px; font-weight:500; cursor:pointer; margin-bottom:2px; }
+    nav button.on, nav button:hover { background:var(--sideActive); color:#f8fafc; }
+    .foot { margin:12px; padding:12px; border-radius:8px; background:#263347; font-size:12px; }
+    .dot { width:7px; height:7px; border-radius:50%; background:#4ade80; display:inline-block; margin-right:6px; }
+    main { flex:1; min-width:0; display:flex; flex-direction:column; }
+    header { background:#fff; border-bottom:1px solid var(--border); padding:16px 24px; display:flex; justify-content:space-between; align-items:center; gap:16px; }
+    header h1 { font-size:16px; }
+    header p { font-size:12px; color:var(--muted); margin-top:2px; }
+    .secret { border:1px solid var(--border); border-radius:8px; padding:8px 10px; font:inherit; font-size:12px; width:160px; background:var(--surface2); }
+    .content { padding:24px; }
+    .grid { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:20px; }
+    .stat { background:#fff; border:1px solid var(--border); border-radius:12px; padding:16px; }
+    .stat .k { font-size:12px; color:var(--subtle); font-weight:500; }
+    .stat .v { font-size:22px; font-weight:700; margin-top:6px; letter-spacing:-.02em; }
+    .card { background:#fff; border:1px solid var(--border); border-radius:12px; padding:18px; box-shadow:0 1px 3px rgba(15,23,42,.06); }
+    label { display:block; font-size:12px; font-weight:600; color:var(--subtle); margin:12px 0 6px; }
+    input, select { width:100%; border:1px solid var(--border); border-radius:8px; padding:10px 12px; font:inherit; font-size:14px; }
+    .btn { border:none; border-radius:8px; padding:11px 16px; font:inherit; font-weight:600; cursor:pointer; }
+    .btn-g { background:#16a34a; color:#fff; width:100%; margin-top:14px; }
+    .btn-g:disabled { opacity:.55; }
+    table { width:100%; border-collapse:collapse; font-size:13px; }
+    th { text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); padding:10px 12px; border-bottom:1px solid var(--border); background:var(--surface2); }
+    td { padding:12px; border-bottom:1px solid #f1f5f9; }
+    tr { cursor:pointer; }
+    tr:hover td { background:var(--surface2); }
+    .badge { font-size:11px; font-weight:600; padding:3px 8px; border-radius:99px; background:#eef2ff; color:var(--brand); }
+    .turn { margin:8px 0; padding:10px 12px; border-radius:10px; font-size:13.5px; line-height:1.5; }
+    .agent { background:#f1f5f9; }
+    .user { background:#dcfce7; }
+    .who { font-size:11px; font-weight:700; color:var(--subtle); margin-bottom:4px; }
+    .msg { font-size:13px; margin-top:10px; min-height:18px; }
+    .ok { color:var(--success); } .err { color:var(--danger); }
+    .dial { max-width:420px; }
+    .rec { display:flex; gap:12px; align-items:center; border:1px solid var(--border); border-radius:12px; padding:12px; margin-bottom:10px; }
+    audio { width:220px; height:32px; }
+    @media (max-width:900px) {
+      body { flex-direction:column; }
+      aside { width:100%; min-height:auto; flex-direction:row; align-items:center; overflow-x:auto; }
+      nav { display:flex; gap:4px; padding:8px; }
+      .logo, .foot { display:none; }
+      .grid { grid-template-columns:1fr 1fr; }
+    }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="card">
-      <h1>Dış arama</h1>
-      <p class="sub">Numarayı girin, ajan arar. Kayıt ve konuşma metni sağda görünür.</p>
-      <label for="secret">Şifre (CALL_SECRET)</label>
-      <input id="secret" type="password" autocomplete="current-password">
-      <label for="to">Aranacak numara</label>
-      <input id="to" type="tel" placeholder="+49..." inputmode="tel">
-      <label for="lang">Dil</label>
-      <select id="lang">
-        <option value="de">Almanca</option>
-        <option value="tr">Türkçe</option>
-      </select>
-      <button class="primary" id="btn" onclick="placeCall()">Ara</button>
-      <div id="msg"></div>
+  <aside>
+    <div class="logo">
+      <div class="mark">VK</div>
+      <div><strong>Callcenter</strong><span>Kontrollpanel</span></div>
     </div>
-    <div class="card">
-      <h1>Kayıtlar</h1>
-      <p class="sub">İki tarafın söyledikleri. Görüşme bitince yenileyin.</p>
-      <div id="list"></div>
-      <div id="detail"></div>
+    <nav>
+      <button class="on" data-tab="dash" onclick="tab('dash')">Dashboard</button>
+      <button data-tab="dial" onclick="tab('dial')">Ara</button>
+      <button data-tab="calls" onclick="tab('calls')">Anrufe</button>
+      <button data-tab="recs" onclick="tab('recs')">Aufnahmen</button>
+    </nav>
+    <div class="foot"><span class="dot"></span>System online<br>Agent: <b style="color:#cbd5e1">Kalmaz</b></div>
+  </aside>
+  <main>
+    <header>
+      <div>
+        <h1 id="title">Übersicht</h1>
+        <p>Gelen hat bozulmaz · kayıt ve transkript burada</p>
+      </div>
+      <input class="secret" id="secret" type="password" placeholder="CALL_SECRET">
+    </header>
+    <div class="content">
+      <section id="dash">
+        <div class="grid">
+          <div class="stat"><div class="k">Toplam arama</div><div class="v" id="s-total">0</div></div>
+          <div class="stat"><div class="k">Giden</div><div class="v" id="s-out">0</div></div>
+          <div class="stat"><div class="k">Gelen</div><div class="v" id="s-in">0</div></div>
+          <div class="stat"><div class="k">Kayıt</div><div class="v" id="s-rec">0</div></div>
+        </div>
+        <div class="card"><p style="color:var(--subtle);font-size:13px">Son aramalar Anrufe sekmesinde. Dil: giden aramada TR/DE seçin; gelen hat Twilio webhook dilini kullanır.</p></div>
+      </section>
+      <section id="dial" class="card dial" hidden>
+        <h2 style="font-size:16px;margin-bottom:4px">Dış arama</h2>
+        <p style="font-size:13px;color:var(--subtle);margin-bottom:8px">Numara + dil. Karşı taraf açınca Kalmaz konuşur.</p>
+        <label>Numara</label>
+        <input id="to" type="tel" placeholder="+49... veya +90...">
+        <label>Dil</label>
+        <select id="lang"><option value="de">Almanca</option><option value="tr">Türkçe</option></select>
+        <button class="btn btn-g" id="btn" onclick="placeCall()">Ara</button>
+        <div class="msg" id="msg"></div>
+      </section>
+      <section id="calls" class="card" hidden>
+        <table>
+          <thead><tr><th>Nummer</th><th>Richtung</th><th>Dil</th><th>Özet</th></tr></thead>
+          <tbody id="tbody"></tbody>
+        </table>
+        <div id="detail" style="margin-top:16px"></div>
+      </section>
+      <section id="recs" hidden>
+        <div id="reclist"></div>
+      </section>
     </div>
-  </div>
+  </main>
   <script>
+    const TITLES = { dash:'Übersicht', dial:'Ara', calls:'Anrufprotokoll', recs:'Aufnahmen' };
     const secretEl = document.getElementById('secret');
     secretEl.value = localStorage.getItem('call_secret') || '';
-    secretEl.addEventListener('change', () => localStorage.setItem('call_secret', secretEl.value.trim()));
+    secretEl.onchange = () => localStorage.setItem('call_secret', secretEl.value.trim());
+    function secret(){ return secretEl.value.trim(); }
+    function headers(){ return { 'Content-Type':'application/json', 'x-call-secret': secret() }; }
 
-    function secret() { return secretEl.value.trim(); }
-    function headers() { return { 'Content-Type': 'application/json', 'x-call-secret': secret() }; }
+    function tab(id){
+      document.querySelectorAll('section').forEach(s => s.hidden = s.id !== id);
+      document.querySelectorAll('nav button').forEach(b => b.classList.toggle('on', b.dataset.tab === id));
+      document.getElementById('title').textContent = TITLES[id];
+      if (id !== 'dial') loadCalls();
+    }
 
-    async function placeCall() {
+    async function placeCall(){
       const btn = document.getElementById('btn');
       const msg = document.getElementById('msg');
-      let to = document.getElementById('to').value.replace(/[\s()-]/g, '');
+      let to = document.getElementById('to').value.replace(/[\s()-]/g,'');
       const lang = document.getElementById('lang').value;
-      msg.className = ''; msg.textContent = '';
-      if (!secret() || !to) { msg.className = 'err'; msg.textContent = 'Şifre ve numara gerekli.'; return; }
-      if (!to.startsWith('+')) to = '+' + to.replace(/^00/, '');
+      msg.className = 'msg'; msg.textContent = '';
+      if (!secret() || !to){ msg.className='msg err'; msg.textContent='Şifre ve numara gerekli.'; return; }
+      if (!to.startsWith('+')) to = '+' + to.replace(/^00/,'');
       localStorage.setItem('call_secret', secret());
       btn.disabled = true; btn.textContent = 'Aranıyor...';
       try {
         const res = await fetch('/twilio/call', { method:'POST', headers: headers(), body: JSON.stringify({ to, lang }) });
         const data = await res.json();
-        if (!res.ok) {
-          msg.className = 'err';
-          msg.textContent = data.error === 'unauthorized' ? 'Şifre hatalı.' : (data.error || 'Arama başlatılamadı.');
-        } else {
-          msg.className = 'ok';
-          msg.textContent = 'Arama başladı.';
-          loadCalls();
-        }
-      } catch (e) { msg.className = 'err'; msg.textContent = 'Bağlantı hatası.'; }
+        if (!res.ok){ msg.className='msg err'; msg.textContent = data.error === 'unauthorized' ? 'Şifre hatalı.' : (data.error || 'Başlatılamadı'); }
+        else { msg.className='msg ok'; msg.textContent = 'Arama başladı · ' + (lang==='tr'?'Türkçe':'Almanca'); loadCalls(); }
+      } catch(e){ msg.className='msg err'; msg.textContent='Bağlantı hatası.'; }
       btn.disabled = false; btn.textContent = 'Ara';
     }
 
-    let selected = null;
-    async function loadCalls() {
+    let selected = null, cache = [];
+    async function loadCalls(){
       if (!secret()) return;
       const res = await fetch('/api/calls', { headers: headers() });
       if (!res.ok) return;
       const data = await res.json();
-      const list = document.getElementById('list');
-      list.innerHTML = (data.calls || []).map(c => `
-        <div class="call ${selected===c.id?'on':''}" onclick="showCall('${c.id}')">
-          <div class="num">${c.phoneNumber || c.id}</div>
-          <div class="meta">${c.direction || ''} · ${c.lang || ''} · ${(c.transcriptPreview || '').slice(0,80)}</div>
-        </div>`).join('') || '<p class="sub">Henüz kayıt yok.</p>';
+      cache = data.calls || [];
+      document.getElementById('s-total').textContent = cache.length;
+      document.getElementById('s-out').textContent = cache.filter(c => c.direction==='outbound').length;
+      document.getElementById('s-in').textContent = cache.filter(c => c.direction==='inbound').length;
+      document.getElementById('s-rec').textContent = cache.filter(c => c.twilioRecordingUrl).length;
+      document.getElementById('tbody').innerHTML = cache.map(c => `
+        <tr onclick="showCall('${c.id}')">
+          <td style="font-family:ui-monospace,monospace;font-weight:600">${c.phoneNumber||c.id}</td>
+          <td><span class="badge">${c.direction==='outbound'?'Ausgehend':'Eingehend'}</span></td>
+          <td>${(c.lang||'').toUpperCase()}</td>
+          <td style="color:var(--subtle);max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.transcriptPreview||'—'}</td>
+        </tr>`).join('') || '<tr><td colspan="4" style="color:var(--muted)">Henüz arama yok.</td></tr>';
+      document.getElementById('reclist').innerHTML = cache.filter(c => c.twilioRecordingUrl).map(c => `
+        <div class="rec card">
+          <div style="flex:1"><div style="font-weight:600">${c.phoneNumber}</div><div style="font-size:12px;color:var(--muted)">${c.lang||''}</div></div>
+          <audio controls preload="none" src="/api/calls/${c.id}/recording?secret=${encodeURIComponent(secret())}"></audio>
+        </div>`).join('') || '<div class="card" style="color:var(--muted)">Henüz ses kaydı yok.</div>';
     }
 
-    async function showCall(id) {
+    async function showCall(id){
       selected = id;
-      const res = await fetch('/api/calls/' + id, { headers: headers() });
+      const res = await fetch('/api/calls/'+id, { headers: headers() });
       if (!res.ok) return;
       const c = await res.json();
-      loadCalls();
-      const turns = (c.transcript || []).map(t => `
-        <div class="turn ${t.role}">
-          <div class="who">${t.role === 'agent' ? 'Ajan' : 'Müşteri'}</div>
-          <div>${(t.text || '').replace(/</g,'')}</div>
-        </div>`).join('') || '<p class="sub">Konuşma metni henüz yok.</p>';
-      const rec = c.twilioRecordingUrl
-        ? `<audio controls src="/api/calls/${c.id}/recording?secret=${encodeURIComponent(secret())}"></audio>`
-        : '';
-      document.getElementById('detail').innerHTML = `<hr style="border:none;border-top:1px solid #e8eaed;margin:16px 0">${turns}${rec}`;
+      const turns = (c.transcript||[]).map(t => `
+        <div class="turn ${t.role}"><div class="who">${t.role==='agent'?'Ajan (Kalmaz)':'Müşteri'}</div>${(t.text||'').replace(/</g,'')}</div>
+      `).join('') || '<p style="color:var(--muted);font-size:13px">Transkript henüz yok — görüşme bitsin.</p>';
+      const rec = c.twilioRecordingUrl ? `<audio controls src="/api/calls/${c.id}/recording?secret=${encodeURIComponent(secret())}"></audio>` : '';
+      document.getElementById('detail').innerHTML = `<h3 style="font-size:14px;margin-bottom:8px">${c.phoneNumber||id}</h3>${turns}${rec}`;
     }
 
     loadCalls();

@@ -7,11 +7,12 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class OpenAIVoiceService:
-    def __init__(self, api_key: str = None, voice: str = None, system_prompt: str = ""):
+    def __init__(self, api_key: str = None, voice: str = None, system_prompt: str = "", phone_mode: bool = False):
         self.api_key = api_key or os.getenv("OPENAI_API_KEY", "")
         self.voice = voice or os.getenv("OPENAI_VOICE", "marin")
         self.model = os.getenv("OPENAI_REALTIME_MODEL", "gpt-realtime")
         self.system_prompt = system_prompt
+        self.phone_mode = phone_mode
         self.ws = None
         self.is_connected = False
         self.url = f"wss://api.openai.com/v1/realtime?model={self.model}"
@@ -54,11 +55,13 @@ class OpenAIVoiceService:
                         # interruptions / awkward silences than semantic_vad here.
                         "turn_detection": {
                             "type": "server_vad",
-                            "threshold": 0.5,
-                            "prefix_padding_ms": 300,
-                            "silence_duration_ms": 400,
+                            "threshold": 0.62 if self.phone_mode else 0.5,
+                            "prefix_padding_ms": 400 if self.phone_mode else 300,
+                            "silence_duration_ms": 750 if self.phone_mode else 400,
                             "create_response": True,
-                            "interrupt_response": True
+                            # Phone lines + Render latency trigger false barge-in;
+                            # don't cut the agent mid-sentence on PSTN.
+                            "interrupt_response": not self.phone_mode
                         }
                     },
                     "output": {
@@ -85,21 +88,34 @@ class OpenAIVoiceService:
         except Exception:
             pass
 
-    async def trigger_greeting(self):
+    async def update_instructions(self, prompt: str):
         if not self.is_connected or not self.ws:
             return
+        self.system_prompt = prompt or self.system_prompt
+        await self.ws.send(json.dumps({
+            "type": "session.update",
+            "session": {
+                "type": "realtime",
+                "instructions": self.system_prompt,
+            }
+        }))
+
+    async def trigger_greeting(self, lang: str = "de"):
+        if not self.is_connected or not self.ws:
+            return
+        if lang == "tr":
+            line = (
+                "Sadece Türkçe konuş. Almanca veya İngilizce kullanma. "
+                "Şimdi Adım 1 açılışını sıcak ve akıcı söyle; cümleleri bölme."
+            )
+        else:
+            line = (
+                "Sprich ausschließlich Deutsch. Kein Türkisch, kein Englisch. "
+                "Beginne jetzt mit Schritt 1 — warm, fließend, nicht abgehackt."
+            )
         await self.ws.send(json.dumps({
             "type": "response.create",
-            "response": {
-                "instructions": (
-                    "Start the conversation now by delivering your Step 1 / Adım 1 opening "
-                    "greeting exactly as defined in your system prompt. Speak warmly and "
-                    "naturally — not like you are reading from a script. Use the language "
-                    "of your system prompt. Keep speech flowing and connected; you may use "
-                    "occasional natural fillers (hmm, mhm, ähm) and light word emphasis, "
-                    "but do not chop sentences into short fragments."
-                )
-            }
+            "response": {"instructions": line}
         }))
 
     async def send_audio(self, pcm_bytes: bytes):

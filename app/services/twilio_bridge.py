@@ -20,7 +20,7 @@ class TwilioSession:
     def __init__(self, ws: WebSocket, lang: str = "de"):
         self.ws = ws
         self.lang = lang
-        self.ai = OpenAIVoiceService(system_prompt=load_prompt(lang))
+        self.ai = OpenAIVoiceService(system_prompt=load_prompt(lang), phone_mode=True)
         self.audio = TwilioAudioBridge()
         self.alive = False
         self.task = None
@@ -78,6 +78,7 @@ class TwilioSession:
                     params = start.get("customParameters") or {}
                     if params.get("lang") in ("tr", "de"):
                         self.lang = params["lang"]
+                    await self.ai.update_instructions(load_prompt(self.lang))
                     self.call_id = params.get("callSid") or start.get("callSid")
                     phone = params.get("from") or params.get("to") or ""
                     direction = params.get("direction") or "inbound"
@@ -91,7 +92,7 @@ class TwilioSession:
                         outcome="in_progress",
                     )
                     print(f"[Twilio] start stream={self.stream_sid} call={self.call_id} lang={self.lang}")
-                    await self.ai.trigger_greeting()
+                    await self.ai.trigger_greeting(self.lang)
                 elif ev == "media":
                     payload = (msg.get("media") or {}).get("payload")
                     if payload:

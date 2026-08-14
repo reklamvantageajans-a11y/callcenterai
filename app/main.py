@@ -31,6 +31,10 @@ async def index():
 async def admin():
     return FileResponse("static/admin.html")
 
+@app.get("/panel")
+async def panel_page():
+    return FileResponse("static/admin.html")
+
 def public_base(request: Request) -> str:
     env = (os.getenv("PUBLIC_URL") or os.getenv("RENDER_EXTERNAL_URL") or "https://callcenterai-yxqp.onrender.com").rstrip("/")
     if env:
@@ -229,7 +233,7 @@ class Session:
         try:
             await self.ai.connect()
             print("[Session] OpenAI connected")
-            await self.ai.trigger_greeting()
+            await self.ai.trigger_greeting(self.lang)
             print("[Session] Greeting triggered")
         except Exception as e:
             print(f"[Session] OpenAI connect error: {e}")
