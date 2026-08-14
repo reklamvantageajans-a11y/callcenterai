@@ -2,300 +2,844 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sigorta Danışmanı</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Sigorta Danışmanı — Sesli Asistan</title>
+  <meta name="description" content="Sigorta danışmanı sesli görüşme hattı">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    * { margin:0; padding:0; box-sizing:border-box; }
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
     :root {
-      --bg: #0a0a0f;
-      --surface: #13131a;
-      --border: #1e1e2a;
-      --text: #e4e4ed;
-      --muted: #6b6b80;
-      --accent: #6c63ff;
-      --accent2: #00d4aa;
-      --glow: rgba(108,99,255,0.25);
+      --bg:         #f7f8fa;
+      --white:      #ffffff;
+      --border:     #e8eaed;
+      --border-2:   #f1f3f5;
+      --text:       #1a1d23;
+      --text-2:     #40444f;
+      --text-3:     #8a909d;
+      --text-4:     #b8bcc8;
+      --navy:       #1a3560;
+      --green:      #0f7c4b;
+      --red:        #c0392b;
+      --amber:      #b45309;
+      --bar-h:      72px;   /* bottom bar height */
     }
+
+    html {
+      height: 100%;
+      /* prevent rubber-band overscroll on iOS */
+      overflow: hidden;
+    }
+
     body {
-      font-family:'Inter',system-ui,sans-serif;
-      background:var(--bg);
-      color:var(--text);
-      height:100vh;
-      display:flex;
-      flex-direction:column;
-      overflow:hidden;
-      -webkit-font-smoothing:antialiased;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      -webkit-font-smoothing: antialiased;
+      overflow: hidden;
+      /* safe areas — yalnızca üst/alt; yan padding fixed bar'ı kaydırır */
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
     }
 
-    /* ── HEADER ── */
+    /* ══════════════════════
+       HEADER
+    ══════════════════════ */
     header {
-      padding:16px 24px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      border-bottom:1px solid var(--border);
-      flex-shrink:0;
+      height: 54px;
+      min-height: 54px;
+      padding: 0 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      z-index: 10;
     }
-    header .brand {
-      display:flex; align-items:center; gap:10px;
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
     }
-    header .brand .dot {
-      width:10px; height:10px; border-radius:50%;
-      background:var(--accent2);
-      box-shadow:0 0 8px var(--accent2);
-      animation:pulse-dot 2s ease infinite;
+
+    .brand-logo {
+      width: 32px;
+      height: 32px;
+      min-width: 32px;
+      border-radius: 8px;
+      background: var(--navy);
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
-    @keyframes pulse-dot {
-      0%,100%{opacity:1;transform:scale(1)}
-      50%{opacity:.5;transform:scale(.8)}
+    .brand-logo svg { width: 15px; height: 15px; }
+
+    .brand-text {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
     }
-    header .brand h1 {
-      font-size:15px; font-weight:600; letter-spacing:.5px;
+
+    .brand-name {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: -0.02em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
+
+    .brand-sub {
+      font-size: 10.5px;
+      color: var(--text-4);
+      font-weight: 400;
+      white-space: nowrap;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+      margin-left: 12px;
+    }
+
+    /* Status pill */
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px 4px 8px;
+      border-radius: 100px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      transition: all .25s ease;
+      white-space: nowrap;
+    }
+
+    .status-pill.s-listening { background: rgba(15,124,75,.08);  border-color: rgba(15,124,75,.28); }
+    .status-pill.s-speaking  { background: rgba(26,53,96,.08);   border-color: rgba(26,53,96,.22);  }
+    .status-pill.s-thinking  { background: rgba(180,83,9,.08);   border-color: rgba(180,83,9,.28);  }
+
+    #conn-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--text-4);
+      flex-shrink: 0;
+      transition: background .3s;
+    }
+    .status-pill.s-listening #conn-dot { background: var(--green); animation: pdot 2s infinite; }
+    .status-pill.s-speaking  #conn-dot { background: var(--navy); }
+    .status-pill.s-thinking  #conn-dot { background: var(--amber); animation: pdot 1.4s infinite; }
+
+    @keyframes pdot {
+      0%,100% { box-shadow: 0 0 0 0 rgba(0,0,0,.15); }
+      50%      { box-shadow: 0 0 0 3px rgba(0,0,0,0); }
+    }
+
     #status-text {
-      font-size:12px; color:var(--muted); font-weight:400;
-      padding:4px 12px;
-      border:1px solid var(--border);
-      border-radius:20px;
-      transition:all .3s;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-3);
+      transition: color .2s;
     }
-    #status-text.active { color:var(--accent2); border-color:var(--accent2); }
-    #status-text.speaking { color:#ff6b6b; border-color:#ff6b6b; }
-    #status-text.thinking { color:#ffd93d; border-color:#ffd93d; }
+    .status-pill.s-listening #status-text { color: var(--green); }
+    .status-pill.s-speaking  #status-text { color: var(--navy); }
+    .status-pill.s-thinking  #status-text { color: var(--amber); }
 
-    /* ── CENTER ── */
-    main {
-      flex:1;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:center;
-      position:relative;
-      overflow:hidden;
-    }
-
-    /* ── ORB ── */
-    #orb-wrap {
-      position:relative;
-      width:220px; height:220px;
-      cursor:pointer;
-    }
-    #orb {
-      width:100%; height:100%;
-      border-radius:50%;
-      background:radial-gradient(circle at 35% 35%, #8b7fff, #6c63ff 40%, #4a3fcf 70%, #2d1f9e);
-      box-shadow:
-        0 0 60px var(--glow),
-        0 0 120px rgba(108,99,255,0.1),
-        inset 0 0 40px rgba(255,255,255,0.05);
-      transition:transform .6s cubic-bezier(.23,1,.32,1), box-shadow .6s;
-      animation:orb-breathe 4s ease-in-out infinite;
-      transform: scale(var(--orb-scale, 1));
-    }
-    @keyframes orb-breathe {
-      0%,100%{transform:scale(var(--orb-scale, 1))}
-      50%{transform:scale(calc(var(--orb-scale, 1) * 1.03))}
-    }
-    #orb.listening {
-      animation:orb-listen .8s ease-in-out infinite alternate;
-      box-shadow:0 0 80px rgba(0,212,170,.3), 0 0 160px rgba(0,212,170,.1);
-      background:radial-gradient(circle at 35% 35%, #00f0c0, #00d4aa 40%, #00a888 70%, #007766);
-    }
-    @keyframes orb-listen {
-      0%{transform:scale(1)}
-      100%{transform:scale(1.08)}
-    }
-    #orb.speaking {
-      box-shadow:0 0 80px rgba(108,99,255,.4), 0 0 160px rgba(108,99,255,.15);
-      transition: transform 0.1s cubic-bezier(.25, .8, .25, 1), box-shadow .6s;
-      animation: none;
-    }
-    #orb.thinking {
-      animation:orb-think 1.5s ease-in-out infinite;
-      box-shadow:0 0 80px rgba(255,217,61,.25);
-      background:radial-gradient(circle at 35% 35%, #ffe680, #ffd93d 40%, #e6b800 70%, #b38f00);
-    }
-    @keyframes orb-think {
-      0%,100%{transform:scale(1) rotate(0deg)}
-      50%{transform:scale(1.05) rotate(3deg)}
-    }
-    #orb-label {
-      position:absolute;
-      bottom:-36px; left:0; right:0;
-      text-align:center;
-      font-size:13px; color:var(--muted);
-      font-weight:500;
-      letter-spacing:1px;
-      text-transform:uppercase;
-    }
-
-    /* ── TRANSCRIPT ── */
-    #transcript {
-      position:absolute;
-      bottom:0; left:0; right:0;
-      max-height:180px;
-      overflow-y:auto;
-      padding:20px 32px;
-      mask-image:linear-gradient(transparent 0%, black 30%);
-      -webkit-mask-image:linear-gradient(transparent 0%, black 30%);
-    }
-    #transcript::-webkit-scrollbar { width:3px; }
-    #transcript::-webkit-scrollbar-track { background:transparent; }
-    #transcript::-webkit-scrollbar-thumb { background:var(--border); border-radius:4px; }
-    .msg {
-      margin-bottom:8px;
-      font-size:14px;
-      line-height:1.5;
-      animation:msg-in .3s ease;
-    }
-    @keyframes msg-in {
-      from{opacity:0;transform:translateY(8px)}
-      to{opacity:1;transform:translateY(0)}
-    }
-    .msg.ai { color:var(--text); }
-    .msg.user { color:var(--accent2); }
-
-    /* ── BOTTOM BAR ── */
-    footer {
-      padding:16px 24px;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:center;
-      gap:12px;
-      border-top:1px solid var(--border);
-      flex-shrink:0;
-    }
-    #lang-picker {
-      display:flex;
-      gap:6px;
-    }
-    .lang-btn {
-      background:var(--surface);
-      border:1px solid var(--border);
-      color:var(--muted);
-      border-radius:20px;
-      padding:5px 14px;
-      font-size:12px;
-      font-weight:500;
-      cursor:pointer;
-      transition:all .2s;
-      font-family:inherit;
-    }
-    .lang-btn:hover  { border-color:#6b6b80; color:var(--text); }
-    .lang-btn.active {
-      border-color:var(--accent2);
-      color:var(--accent2);
-      background:rgba(0,212,170,.08);
-    }
-    .btn-row {
-      display:flex;
-      align-items:center;
-      gap:16px;
-    }
-    .btn {
-      width:52px; height:52px;
-      border-radius:50%;
-      border:none;
-      cursor:pointer;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      transition:all .2s;
-      position:relative;
-    }
-    .btn svg { width:22px; height:22px; }
-    .btn:hover { transform:scale(1.1); }
-    .btn:active { transform:scale(.95); }
-
-    #btn-call {
-      width:64px; height:64px;
-      background:linear-gradient(135deg, #00d4aa, #00b894);
-      box-shadow:0 0 20px rgba(0,212,170,.3);
-    }
-    #btn-call svg { fill:#fff; width:26px; height:26px; }
-    #btn-call.active {
-      background:linear-gradient(135deg, #ff6b6b, #ee5a24);
-      box-shadow:0 0 20px rgba(255,107,107,.3);
-    }
-    #btn-mute {
-      background:var(--surface);
-      border:1px solid var(--border);
-    }
-    #btn-mute svg { fill:var(--text); }
-    #btn-mute.muted {
-      background:rgba(255,107,107,.15);
-      border-color:#ff6b6b;
-    }
-    #btn-mute.muted svg { fill:#ff6b6b; }
-
-    /* ── RING ANIMATION ── */
-    .ring {
-      position:absolute;
-      width:100%; height:100%;
-      border-radius:50%;
-      border:2px solid var(--accent);
-      opacity:0;
-      pointer-events:none;
-    }
-    #orb.speaking .ring {
-      animation:ring-out 1.5s ease-out infinite;
-    }
-    #orb.listening .ring {
-      border-color:var(--accent2);
-      animation:ring-out 2s ease-out infinite;
-    }
-    @keyframes ring-out {
-      0%{transform:scale(1);opacity:.6}
-      100%{transform:scale(1.8);opacity:0}
-    }
-
-    /* ── PING ── */
     #ping {
-      position:fixed;
-      top:16px; right:24px;
-      font-size:11px;
-      color:var(--muted);
-      font-variant-numeric:tabular-nums;
+      font-size: 10px;
+      font-weight: 500;
+      font-variant-numeric: tabular-nums;
+      color: var(--text-4);
+      min-width: 0;
+    }
+
+    /* ══════════════════════
+       MAIN — fills remaining space
+    ══════════════════════ */
+    main {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      /* leave room for fixed bottom bar */
+      padding: 24px 20px calc(var(--bar-h) + 36px + env(safe-area-inset-bottom));
+      gap: 0;
+      overflow: hidden;
+    }
+
+    /* Center mark (logo icon) */
+    .center-mark {
+      width: 52px; height: 52px;
+      min-height: 52px;
+      border-radius: 14px;
+      background: var(--navy);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 22px;
+      box-shadow: 0 4px 18px rgba(26,53,96,.22);
+      transition: transform .3s ease, box-shadow .3s ease;
+      flex-shrink: 0;
+    }
+    .center-mark.pulsing {
+      animation: mpulse 2s ease-in-out infinite;
+    }
+    .center-mark svg { width: 24px; height: 24px; }
+
+    @keyframes mpulse {
+      0%,100% { transform: scale(1);    box-shadow: 0 4px 18px rgba(26,53,96,.22); }
+      50%      { transform: scale(1.07); box-shadow: 0 8px 28px rgba(26,53,96,.32); }
+    }
+
+    .center-heading {
+      font-size: clamp(18px, 5vw, 26px);
+      font-weight: 600;
+      color: var(--text);
+      text-align: center;
+      letter-spacing: -0.025em;
+      line-height: 1.3;
+      max-width: 380px;
+      margin-bottom: 8px;
+    }
+
+    .center-sub {
+      font-size: clamp(12px, 3vw, 14px);
+      font-weight: 400;
+      color: var(--text-3);
+      text-align: center;
+      line-height: 1.5;
+      max-width: 320px;
+      margin-bottom: 36px;
+    }
+
+    /* Waveform */
+    .wave-wrap {
+      width: 100%;
+      max-width: 420px;
+      height: 64px;
+      flex-shrink: 0;
+    }
+
+    #wave {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Transcript */
+    #transcript-wrap {
+      width: 100%;
+      max-width: 480px;
+      max-height: 110px;
+      overflow: hidden;
+      opacity: 0;
+      transition: opacity .35s ease;
+      pointer-events: none;
+      margin-top: 18px;
+      flex-shrink: 0;
+    }
+    #transcript-wrap.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    #transcript {
+      max-height: 110px;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    #transcript::-webkit-scrollbar { display: none; }
+
+    .msg {
+      font-size: 13px;
+      font-weight: 400;
+      line-height: 1.6;
+      text-align: center;
+      margin-bottom: 4px;
+    }
+    .msg.ai   { color: var(--text-2); }
+    .msg.user { color: var(--text-4); font-style: italic; }
+
+    /* ══════════════════════
+       BOTTOM BAR — fixed
+    ══════════════════════ */
+
+    /* Dış kapsayıcı: tam ekran genişliği, flex ile iç bar'ı ortalar */
+    .bottom-bar-outer {
+      position: fixed;
+      bottom: calc(20px + env(safe-area-inset-bottom));
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: center;
+      padding: 0 16px;
+      z-index: 100;
+      pointer-events: none; /* tıklama iç bar'a geçsin */
+    }
+
+    .bottom-bar {
+      pointer-events: auto;
+      width: 100%;
+      max-width: 480px;
+      height: var(--bar-h);
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      box-shadow:
+        0 4px 24px rgba(0,0,0,.09),
+        0 1px 4px rgba(0,0,0,.05);
+      padding: 10px 10px 10px 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Language picker */
+    #lang-picker {
+      display: flex;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 3px;
+      gap: 2px;
+      flex-shrink: 0;
+      transition: opacity .2s;
+    }
+
+    .lang-btn {
+      font-family: inherit;
+      background: transparent;
+      border: none;
+      color: var(--text-3);
+      border-radius: 100px;
+      padding: 5px 13px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .15s;
+      letter-spacing: .03em;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .lang-btn:hover:not(.active) { color: var(--text); }
+    .lang-btn.active {
+      background: var(--navy);
+      color: #fff;
+    }
+
+    /* Bar label */
+    .bar-label {
+      flex: 1;
+      font-size: 13px;
+      color: var(--text-4);
+      font-weight: 400;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      letter-spacing: -0.01em;
+      user-select: none;
+      transition: color .2s;
+      min-width: 0;
+    }
+    .bar-label.live { color: var(--text-2); }
+
+    /* Mute btn */
+    #btn-mute {
+      width: 40px; height: 40px;
+      min-width: 40px;
+      border-radius: 50%;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background .15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    #btn-mute svg { width: 17px; height: 17px; fill: var(--text-3); }
+    #btn-mute:hover { background: var(--bg); }
+    #btn-mute.muted { background: rgba(192,57,43,.10); }
+    #btn-mute.muted svg { fill: var(--red); }
+
+    /* Call btn */
+    #btn-call {
+      width: 48px; height: 48px;
+      min-width: 48px;
+      border-radius: 50%;
+      border: none;
+      background: var(--green);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 12px rgba(15,124,75,.32);
+      transition: background .2s, box-shadow .2s, transform .15s;
+      position: relative;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+    #btn-call svg { width: 20px; height: 20px; fill: #fff; }
+
+    #btn-call:hover  { background: #0c6840; box-shadow: 0 4px 18px rgba(15,124,75,.42); transform: scale(1.05); }
+    #btn-call:active { transform: scale(.95); }
+
+    #btn-call.active {
+      background: var(--red);
+      box-shadow: 0 2px 12px rgba(192,57,43,.32);
+    }
+    #btn-call.active:hover { background: #a93226; }
+
+    #btn-call.active::after {
+      content: '';
+      position: absolute;
+      inset: -5px;
+      border-radius: 50%;
+      border: 2px solid rgba(192,57,43,.28);
+      animation: ring 1.8s ease-out infinite;
+      pointer-events: none;
+    }
+    @keyframes ring {
+      0%   { transform: scale(1); opacity: 1; }
+      100% { transform: scale(1.6); opacity: 0; }
+    }
+
+    /* ══════════════════════
+       ANIMATIONS
+    ══════════════════════ */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .center-mark    { animation: fadeUp .45s ease both; }
+    .center-heading { animation: fadeUp .45s .07s ease both; }
+    .center-sub     { animation: fadeUp .45s .13s ease both; }
+    .wave-wrap      { animation: fadeUp .45s .17s ease both; }
+    .bottom-bar-outer { animation: fadeUp .45s .2s ease both; }
+
+    /* ══════════════════════
+       RESPONSIVE TWEAKS
+    ══════════════════════ */
+
+    /* Very small phones (< 360px) */
+    @media (max-width: 359px) {
+      .brand-sub { display: none; }
+      .center-heading { font-size: 17px; }
+      .bottom-bar { padding: 8px 8px 8px 14px; gap: 8px; }
+      .lang-btn { padding: 5px 10px; font-size: 10.5px; }
+      .bar-label { font-size: 12px; }
+    }
+
+    /* Landscape mobile */
+    @media (max-height: 500px) and (orientation: landscape) {
+      header { height: 46px; min-height: 46px; }
+      .center-mark { width: 38px; height: 38px; min-height: 38px; margin-bottom: 12px; border-radius: 10px; }
+      .center-mark svg { width: 18px; height: 18px; }
+      .center-heading { margin-bottom: 4px; }
+      .center-sub { margin-bottom: 16px; }
+      .wave-wrap { height: 48px; }
+      main { padding-bottom: calc(60px + 20px + env(safe-area-inset-bottom)); }
+      :root { --bar-h: 60px; }
+      .bottom-bar-outer { bottom: calc(12px + env(safe-area-inset-bottom)); }
     }
   </style>
 </head>
 <body>
-  <header>
-    <div class="brand">
-      <div class="dot" id="conn-dot"></div>
-      <h1>Sigorta Danışmanı</h1>
-    </div>
-    <span id="status-text">Bağlantı bekleniyor</span>
-  </header>
 
-  <main>
-    <div id="orb-wrap" onclick="toggleCall()">
-      <div id="orb">
-        <div class="ring"></div>
-        <div class="ring" style="animation-delay:.5s"></div>
-      </div>
-      <div id="orb-label">Başlamak için dokunun</div>
+<!-- ══════ HEADER ══════ -->
+<header>
+  <div class="brand">
+    <div class="brand-logo">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M6.62 10.79a15.05 15.05 0 006.59 6.59l2.2-2.2a1 1 0 011.11-.27 11.36 11.36 0 003.53.56 1 1 0 011 1V20a1 1 0 01-1 1A17 17 0 013 4a1 1 0 011-1h3.5a1 1 0 011 1 11.36 11.36 0 00.56 3.53 1 1 0 01-.27 1.11z" fill="white"/>
+      </svg>
     </div>
+    <div class="brand-text">
+      <span class="brand-name">Sigorta Danışmanı</span>
+      <span class="brand-sub">Sesli görüşme hattı</span>
+    </div>
+  </div>
+
+  <div class="header-right">
+    <div class="status-pill" id="status-badge">
+      <div id="conn-dot"></div>
+      <span id="status-text">Hazır</span>
+    </div>
+    <span id="ping"></span>
+  </div>
+</header>
+
+<!-- ══════ MAIN ══════ -->
+<main>
+  <div class="center-mark" id="center-mark">
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M6.62 10.79a15.05 15.05 0 006.59 6.59l2.2-2.2a1 1 0 011.11-.27 11.36 11.36 0 003.53.56 1 1 0 011 1V20a1 1 0 01-1 1A17 17 0 013 4a1 1 0 011-1h3.5a1 1 0 011 1 11.36 11.36 0 00.56 3.53 1 1 0 01-.27 1.11z" fill="white"/>
+    </svg>
+  </div>
+
+  <h1 class="center-heading" id="center-heading">Size nasıl yardımcı olabilirim?</h1>
+  <p class="center-sub" id="center-sub">Aramayı başlatın, sigorta danışmanınız hazır.</p>
+
+  <div class="wave-wrap">
+    <canvas id="wave"></canvas>
+  </div>
+
+  <div id="transcript-wrap">
     <div id="transcript"></div>
-  </main>
+  </div>
+</main>
 
-  <footer>
-    <div id="lang-picker" style="display:flex;gap:8px;margin-bottom:4px;">
-      <button id="btn-de" class="lang-btn active" onclick="setLang('de')">🇩🇪 DE</button>
-      <button id="btn-tr" class="lang-btn"        onclick="setLang('tr')">🇹🇷 TR</button>
-    </div>
-    <div class="btn-row">
-    <button class="btn" id="btn-mute" onclick="toggleMute()" style="display:none">
-      <svg viewBox="0 0 24 24"><path d="M12 14a3 3 0 003-3V5a3 3 0 00-6 0v6a3 3 0 003 3zm5-3a5 5 0 01-10 0H5a7 7 0 0014 0h-2zm-5 9a1 1 0 01-1-1h2a1 1 0 01-1 1z"/></svg>
-    </button>
-    <button class="btn" id="btn-call" onclick="toggleCall()">
-      <svg viewBox="0 0 24 24"><path d="M6.62 10.79a15.05 15.05 0 006.59 6.59l2.2-2.2a1 1 0 011.11-.27 11.36 11.36 0 003.53.56 1 1 0 011 1V20a1 1 0 01-1 1A17 17 0 013 4a1 1 0 011-1h3.5a1 1 0 011 1 11.36 11.36 0 00.56 3.53 1 1 0 01-.27 1.11z"/></svg>
-    </button>
-    </div>
-  </footer>
-  <div id="ping"></div>
-  <script src="/static/app.js"></script>
+<!-- ══════ BOTTOM BAR ══════ -->
+<div class="bottom-bar-outer">
+<div class="bottom-bar">
+  <div id="lang-picker">
+    <button id="btn-de" class="lang-btn active" onclick="setLang('de')">DE</button>
+    <button id="btn-tr" class="lang-btn" onclick="setLang('tr')">TR</button>
+  </div>
+
+  <span class="bar-label" id="bar-label">Aramayı başlatın</span>
+
+  <button id="btn-mute" onclick="toggleMute()" style="display:none" aria-label="Sessiz">
+    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 1a4 4 0 014 4v6a4 4 0 01-8 0V5a4 4 0 014-4zm0 2a2 2 0 00-2 2v6a2 2 0 004 0V5a2 2 0 00-2-2zm-7 8h2a5 5 0 0010 0h2a7 7 0 01-6 6.92V20h3v2H8v-2h3v-2.08A7 7 0 015 11z"/>
+    </svg>
+  </button>
+
+  <button id="btn-call" onclick="toggleCall()" aria-label="Aramayı başlat">
+    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path d="M6.62 10.79a15.05 15.05 0 006.59 6.59l2.2-2.2a1 1 0 011.11-.27 11.36 11.36 0 003.53.56 1 1 0 011 1V20a1 1 0 01-1 1A17 17 0 013 4a1 1 0 011-1h3.5a1 1 0 011 1 11.36 11.36 0 00.56 3.53 1 1 0 01-.27 1.11z"/>
+    </svg>
+  </button>
+</div>
+</div>
+
+
+<!-- ══════ SCRIPT ══════ -->
+<script>
+// ═══════════════════════════════════════════════════
+//  Voice Call Client — Minimal, Fast, Low-Latency
+// ═══════════════════════════════════════════════════
+let ws = null;
+let audioCtx = null;
+let mediaStream = null;
+let micNode = null;
+let micSource = null;
+let isMuted = false;
+let isActive = false;
+let nextPlayTime = 0;
+let playbackStart = null;
+let activeSources = [];
+let currentBubble = null;
+let pingTimer = null;
+let selectedLang = 'de';
+
+const JITTER_BUFFER = 0.12;
+
+const waveCanvas     = document.getElementById('wave');
+const statusBadge    = document.getElementById('status-badge');
+const connDot        = document.getElementById('conn-dot');
+const statusText     = document.getElementById('status-text');
+const barLabel       = document.getElementById('bar-label');
+const transcript     = document.getElementById('transcript');
+const transcriptWrap = document.getElementById('transcript-wrap');
+const btnCall        = document.getElementById('btn-call');
+const btnMute        = document.getElementById('btn-mute');
+const pingEl         = document.getElementById('ping');
+const centerMark     = document.getElementById('center-mark');
+const centerSub      = document.getElementById('center-sub');
+
+// ── WAVE ──
+const WAVE_BARS = 50;
+const waveLevels = new Float32Array(WAVE_BARS);
+let waveTarget = 0;
+let waveMode = 'idle';
+
+function pushWaveLevel(rms) {
+  waveTarget = Math.min(1, rms * 4.2);
+}
+
+(function startWaveLoop() {
+  const ctx = waveCanvas.getContext('2d');
+  function draw() {
+    requestAnimationFrame(draw);
+    const base = waveMode === 'idle' ? 0.05 : waveMode === 'thinking' ? 0.13 : 0.04;
+    const jitter = (Math.random() - 0.5) * base * 0.7;
+    const next = Math.min(1, waveTarget * 0.88 + base + jitter);
+    for (let i = 0; i < WAVE_BARS - 1; i++) waveLevels[i] = waveLevels[i + 1];
+    waveLevels[WAVE_BARS - 1] = next;
+    waveTarget *= 0.80;
+
+    const dpr = window.devicePixelRatio || 1;
+    const w = waveCanvas.clientWidth;
+    const h = waveCanvas.clientHeight;
+    if (waveCanvas.width  !== Math.round(w * dpr) ||
+        waveCanvas.height !== Math.round(h * dpr)) {
+      waveCanvas.width  = Math.round(w * dpr);
+      waveCanvas.height = Math.round(h * dpr);
+    }
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+
+    const slot = w / WAVE_BARS;
+    const barW = Math.max(2, slot * 0.40);
+    const mid  = h / 2;
+
+    const palettes = {
+      speaking:  ['#1a3560', '#3a5a90'],
+      listening: ['#0f7c4b', '#1aab6a'],
+      thinking:  ['#b45309', '#d97706'],
+      idle:      ['#d1d5db', '#e5e7eb'],
+    };
+    const [cA, cB] = palettes[waveMode] || palettes.idle;
+
+    for (let i = 0; i < WAVE_BARS; i++) {
+      const amp = Math.max(0.04, waveLevels[i]);
+      const bh  = amp * (h * 0.80);
+      const x   = i * slot + (slot - barW) / 2;
+      const y   = mid - bh / 2;
+      const r   = Math.min(barW / 2, 3);
+      const dist = Math.abs(i - WAVE_BARS / 2) / (WAVE_BARS / 2);
+      ctx.fillStyle = lerpHex(cB, cA, 1 - dist * 0.45);
+      ctx.beginPath();
+      if (ctx.roundRect) ctx.roundRect(x, y, barW, bh, r);
+      else ctx.rect(x, y, barW, bh);
+      ctx.fill();
+    }
+  }
+  draw();
+})();
+
+function lerpHex(a, b, t) {
+  const ah = parseInt(a.slice(1), 16), bh = parseInt(b.slice(1), 16);
+  const ar=(ah>>16)&0xff, ag=(ah>>8)&0xff, ab=ah&0xff;
+  const br=(bh>>16)&0xff, bg=(bh>>8)&0xff, bb=bh&0xff;
+  return `rgb(${Math.round(ar+(br-ar)*t)},${Math.round(ag+(bg-ag)*t)},${Math.round(ab+(bb-ab)*t)})`;
+}
+
+// ── STATE ──
+const STATE_CFG = {
+  listening: { cls: 's-listening', label: 'Dinliyor',  barText: 'Sizi dinliyorum...' },
+  speaking:  { cls: 's-speaking',  label: 'Konuşuyor', barText: 'Yanıt veriliyor...' },
+  thinking:  { cls: 's-thinking',  label: 'Düşünüyor', barText: 'Düşünüyor...' },
+};
+
+function setState(state, label) {
+  waveMode = state || 'idle';
+  statusBadge.className = 'status-pill' + (STATE_CFG[state] ? ` ${STATE_CFG[state].cls}` : '');
+  statusText.textContent = label || 'Hazır';
+  if (STATE_CFG[state]) {
+    barLabel.textContent = STATE_CFG[state].barText;
+    barLabel.classList.add('live');
+  }
+  if (state === 'listening' || state === 'speaking') {
+    centerMark.classList.add('pulsing');
+  } else {
+    centerMark.classList.remove('pulsing');
+  }
+}
+
+// ── LANGUAGE ──
+function setLang(lang) {
+  if (isActive) return;
+  selectedLang = lang;
+  document.getElementById('btn-de').classList.toggle('active', lang === 'de');
+  document.getElementById('btn-tr').classList.toggle('active', lang === 'tr');
+  barLabel.textContent = lang === 'tr' ? 'Aramayı başlatın' : 'Anruf starten';
+  barLabel.classList.remove('live');
+  centerSub.textContent = lang === 'tr'
+    ? 'Aramayı başlatın, sigorta danışmanınız hazır.'
+    : 'Starten Sie den Anruf, Ihr Versicherungsberater ist bereit.';
+}
+
+// ── CALL ──
+async function toggleCall() { isActive ? endCall() : await startCall(); }
+
+async function startCall() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 24000 });
+  }
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+
+  try {
+    mediaStream = await navigator.mediaDevices.getUserMedia({
+      audio: { channelCount:1, echoCancellation:true, noiseSuppression:true, autoGainControl:true }
+    });
+  } catch (e) { alert('Mikrofon izni gerekli!'); return; }
+
+  isActive = true;
+  btnCall.classList.add('active');
+  btnMute.style.display = 'flex';
+  const picker = document.getElementById('lang-picker');
+  picker.style.opacity = '0.4';
+  picker.style.pointerEvents = 'none';
+  barLabel.textContent = selectedLang === 'tr' ? 'Bağlanıyor...' : 'Verbinde...';
+  barLabel.classList.add('live');
+
+  const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+  ws = new WebSocket(`${proto}://${location.host}/ws/voice?lang=${selectedLang}`);
+  ws.binaryType = 'arraybuffer';
+
+  ws.onopen = async () => {
+    setState('listening', 'Bağlandı');
+    await startMic();
+    pingTimer = setInterval(() => {
+      if (ws && ws.readyState === 1) ws.send(JSON.stringify({ event:'ping', ts:Date.now() }));
+    }, 5000);
+  };
+
+  ws.onclose = () => { if (isActive) endCall(); };
+  ws.onerror = () => { if (isActive) endCall(); };
+
+  ws.onmessage = (e) => {
+    const msg = JSON.parse(e.data);
+    switch (msg.event) {
+      case 'audio':   playChunk(msg.data); setState('speaking', 'Konuşuyor'); break;
+      case 'text':    appendAI(msg.delta); break;
+      case 'done':
+        setState('listening', 'Dinliyor');
+        currentBubble = null; playbackStart = null; nextPlayTime = 0; break;
+      case 'speech_start':
+        reportInterrupt(); flushAudio();
+        setState('listening', 'Dinliyor'); currentBubble = null; break;
+      case 'speech_stop':  setState('thinking', 'Düşünüyor'); break;
+      case 'interrupted':
+        flushAudio(); setState('listening', 'Dinliyor'); currentBubble = null; break;
+      case 'pong':
+        if (msg.ts) pingEl.textContent = (Date.now() - msg.ts) + ' ms'; break;
+      case 'error':
+        console.error('Server error:', msg.message);
+        alert('Bağlantı hatası: ' + msg.message); endCall(); break;
+    }
+  };
+}
+
+function endCall() {
+  isActive = false;
+  if (pingTimer) { clearInterval(pingTimer); pingTimer = null; }
+  if (ws) { ws.close(); ws = null; }
+  stopMic(); flushAudio();
+  if (audioCtx) { audioCtx.close(); audioCtx = null; }
+
+  btnCall.classList.remove('active');
+  btnMute.style.display = 'none';
+  btnMute.classList.remove('muted');
+  isMuted = false;
+
+  const picker = document.getElementById('lang-picker');
+  picker.style.opacity = '';
+  picker.style.pointerEvents = '';
+
+  statusBadge.className = 'status-pill';
+  statusText.textContent = 'Hazır';
+  connDot.style.background = '';
+  barLabel.textContent = selectedLang === 'tr' ? 'Aramayı başlatın' : 'Anruf starten';
+  barLabel.classList.remove('live');
+  centerMark.classList.remove('pulsing');
+  pingEl.textContent = '';
+  transcriptWrap.classList.remove('visible');
+  currentBubble = null;
+  waveMode = 'idle';
+}
+
+// ── MIC ──
+async function startMic() {
+  if (!audioCtx || !mediaStream) return;
+  try { await audioCtx.audioWorklet.addModule('/static/pcm-worklet.js'); }
+  catch (e) { console.error('Worklet load failed:', e); return; }
+
+  micSource = audioCtx.createMediaStreamSource(mediaStream);
+  micNode   = new AudioWorkletNode(audioCtx, 'pcm-processor');
+  micNode.port.onmessage = (e) => {
+    if (!ws || ws.readyState !== 1 || isMuted) return;
+    const pcm = new Int16Array(e.data);
+    let sum = 0; const step = 8;
+    for (let i = 0; i < pcm.length; i += step) { const v = pcm[i]/32768; sum += v*v; }
+    pushWaveLevel(Math.sqrt(sum / Math.max(1, pcm.length / step)));
+    ws.send(e.data);
+  };
+  micSource.connect(micNode);
+  micNode.connect(audioCtx.destination);
+  connDot.style.background = '#0f7c4b';
+}
+
+function stopMic() {
+  if (micNode)   { try { micNode.port.onmessage = null; micNode.disconnect(); } catch {} micNode = null; }
+  if (micSource) { try { micSource.disconnect(); } catch {} micSource = null; }
+  if (mediaStream) { mediaStream.getTracks().forEach(t => t.stop()); mediaStream = null; }
+}
+
+function reportInterrupt() {
+  if (!audioCtx || playbackStart === null) return;
+  let playedMs = (audioCtx.currentTime - playbackStart) * 1000;
+  const totalMs = (nextPlayTime - playbackStart) * 1000;
+  if (playedMs < 0) playedMs = 0;
+  if (playedMs > totalMs) playedMs = totalMs;
+  if (ws && ws.readyState === 1) ws.send(JSON.stringify({ event:'interrupt', ms:Math.round(playedMs) }));
+}
+
+function toggleMute() { isMuted = !isMuted; btnMute.classList.toggle('muted', isMuted); }
+
+// ── AUDIO PLAYBACK ──
+function playChunk(b64) {
+  if (!audioCtx) return;
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  try {
+    const raw = atob(b64);
+    const pcm16 = new Int16Array(raw.length / 2);
+    for (let i = 0; i < pcm16.length; i++) {
+      const lsb = raw.charCodeAt(i*2), msb = raw.charCodeAt(i*2+1);
+      let val = (msb<<8)|lsb; if (val>=0x8000) val-=0x10000; pcm16[i]=val;
+    }
+    const f32 = new Float32Array(pcm16.length);
+    let sq = 0;
+    for (let i = 0; i < pcm16.length; i++) { f32[i]=pcm16[i]/32768; sq+=f32[i]*f32[i]; }
+    pushWaveLevel(Math.sqrt(sq / f32.length));
+
+    const buf = audioCtx.createBuffer(1, f32.length, 24000);
+    buf.getChannelData(0).set(f32);
+    const src = audioCtx.createBufferSource();
+    src.buffer = buf; src.connect(audioCtx.destination);
+
+    const now = audioCtx.currentTime;
+    let startAt;
+    if (playbackStart === null || nextPlayTime <= now) {
+      startAt = now + JITTER_BUFFER; playbackStart = startAt;
+    } else { startAt = nextPlayTime; }
+    src.start(startAt); nextPlayTime = startAt + buf.duration;
+    activeSources.push(src);
+    src.onended = () => { const i = activeSources.indexOf(src); if (i!==-1) activeSources.splice(i,1); };
+  } catch (e) { console.error('Audio playback error:', e); }
+}
+
+function flushAudio() {
+  activeSources.forEach(s => { try { s.stop(); } catch {} });
+  activeSources = []; nextPlayTime = 0; playbackStart = null;
+}
+
+// ── TRANSCRIPT ──
+function appendAI(text) {
+  transcriptWrap.classList.add('visible');
+  if (!currentBubble) {
+    currentBubble = document.createElement('div');
+    currentBubble.className = 'msg ai';
+    transcript.appendChild(currentBubble);
+  }
+  currentBubble.textContent += text;
+  transcript.scrollTop = transcript.scrollHeight;
+}
+</script>
 </body>
 </html>

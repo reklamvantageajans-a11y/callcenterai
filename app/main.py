@@ -154,6 +154,12 @@ class Session:
                 print(f"[AI] unhandled: {t}")
 
 @app.websocket("/ws/voice")
-async def ws_voice(websocket: WebSocket, lang: str = "de"):
-    s = Session(websocket, lang=lang)
-    await s.run()
+async def ws_voice(websocket: WebSocket):
+    lang = websocket.query_params.get("lang", "de")
+    try:
+        s = Session(websocket, lang=lang)
+        await s.run()
+    except Exception as exc:
+        import traceback
+        print(f"[ws_voice] HATA lang={lang}: {exc}")
+        traceback.print_exc()

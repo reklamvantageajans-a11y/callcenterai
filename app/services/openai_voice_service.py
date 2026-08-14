@@ -27,10 +27,15 @@ class OpenAIVoiceService:
                 additional_headers=headers,
                 max_size=2**24,
                 ping_interval=20,
-                ping_timeout=20
+                ping_timeout=20,
+                proxy=None,
             )
         except TypeError:
-            self.ws = await websockets.connect(self.url, extra_headers=headers)
+            self.ws = await websockets.connect(
+                self.url,
+                extra_headers=headers,
+                proxy=None,
+            )
         self.is_connected = True
         await self._init_session()
 
@@ -90,7 +95,9 @@ class OpenAIVoiceService:
                     "Start the conversation now by delivering your Step 1 / Adım 1 opening "
                     "greeting exactly as defined in your system prompt. Speak warmly and "
                     "naturally — not like you are reading from a script. Use the language "
-                    "of your system prompt."
+                    "of your system prompt. Keep speech flowing and connected; you may use "
+                    "occasional natural fillers (hmm, mhm, ähm) and light word emphasis, "
+                    "but do not chop sentences into short fragments."
                 )
             }
         }))
