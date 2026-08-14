@@ -5,6 +5,7 @@ from fastapi import WebSocket, WebSocketDisconnect
 from starlette.websockets import WebSocketState
 from app.services.openai_voice_service import OpenAIVoiceService
 from app.services.audio_convert import TwilioAudioBridge
+from app.services import call_store
 
 
 def load_prompt(lang: str) -> str:
@@ -25,6 +26,13 @@ class TwilioSession:
         self.task = None
         self.stream_sid = None
         self.last_item_id = None
+        self.call_id = None
+        self.agent_buf = ""
+
+    def _flush_agent(self):
+        if self.agent_buf.strip():
+            call_store.add_turn(self.call_id, "agent", self.agent_buf)
+        self.agent_buf = ""
 
     async def send_twilio(self, data: dict):
         try:
@@ -70,7 +78,19 @@ class TwilioSession:
                     params = start.get("customParameters") or {}
                     if params.get("lang") in ("tr", "de"):
                         self.lang = params["lang"]
-                    print(f"[Twilio] start stream={self.stream_sid} lang={self.lang}")
+                    self.call_id = params.get("callSid") or start.get("callSid")
+                    phone = params.get("from") or params.get("to") or ""
+                    direction = params.get("direction") or "inbound"
+                    call_store.upsert(
+                        self.call_id,
+                        phoneNumber=phone,
+                        contactName=phone,
+                        direction=direction,
+                        lang=self.lang,
+                        status="in_progress",
+                        outcome="in_progress",
+                    )
+                    print(f"[Twilio] start stream={self.stream_sid} call={self.call_id} lang={self.lang}")
                     await self.ai.trigger_greeting()
                 elif ev == "media":
                     payload = (msg.get("media") or {}).get("payload")
@@ -85,6 +105,8 @@ class TwilioSession:
         except Exception as e:
             print(f"[Twilio] loop error: {e}")
         finally:
+            self._flush_agent()
+            call_store.finish(self.call_id)
             self.alive = False
             if self.task:
                 self.task.cancel()
@@ -108,8 +130,15 @@ class TwilioSession:
                         "streamSid": self.stream_sid,
                         "media": {"payload": payload},
                     })
+            elif "transcript" in t and "delta" in t and "input_audio" not in t:
+                self.agent_buf += ev.get("delta") or ""
+            elif t in ("response.done", "response.completed", "response.output_audio_transcript.done"):
+                self._flush_agent()
+            elif t == "conversation.item.input_audio_transcription.completed":
+                call_store.add_turn(self.call_id, "user", ev.get("transcript") or "")
             elif t == "input_audio_buffer.speech_started":
                 print("[Twilio] barge-in")
+                self._flush_agent()
                 await self.clear_playback()
                 await self.ai.cancel()
             elif t == "error":

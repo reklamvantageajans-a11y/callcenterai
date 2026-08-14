@@ -1,17 +1,26 @@
 import os
 import json
 import asyncio
+import html
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
 from fastapi.responses import FileResponse, Response, JSONResponse
 from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
 from starlette.websockets import WebSocketState
 from app.services.openai_voice_service import OpenAIVoiceService
 from app.services.twilio_bridge import TwilioSession, load_prompt
+from app.services import call_store
 
 load_dotenv()
 
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 @app.get("/")
@@ -32,20 +41,40 @@ def public_base(request: Request) -> str:
 
 @app.api_route("/twilio/voice", methods=["GET", "POST"])
 async def twilio_voice(request: Request, lang: str = "de"):
-    await request.body()
     lang = lang if lang in ("tr", "de") else "de"
+    form = {}
+    if request.method == "POST":
+        try:
+            form = dict(await request.form())
+        except Exception:
+            await request.body()
+    call_sid = str(form.get("CallSid") or "")
+    frm = str(form.get("From") or "")
+    to = str(form.get("To") or "")
+    direction = "outbound" if str(form.get("Direction") or "").startswith("outbound") else "inbound"
+    phone = frm if direction == "inbound" else to
     base_url = public_base(request)
     proto = "wss" if base_url.startswith("https") else "ws"
     host = base_url.split("://", 1)[-1]
     stream_url = f"{proto}://{host}/twilio/media?lang={lang}"
+    rec_cb = f"{base_url}/twilio/recording"
+
+    def p(name, value):
+        return f'<Parameter name="{html.escape(name, quote=True)}" value="{html.escape(str(value), quote=True)}" />'
+
     xml = (
         '<?xml version="1.0" encoding="UTF-8"?>'
-        "<Response><Connect>"
-        f'<Stream url="{stream_url}">'
-        f'<Parameter name="lang" value="{lang}" />'
+        "<Response>"
+        f'<Start><Recording recordingStatusCallback="{html.escape(rec_cb, quote=True)}" '
+        'recordingStatusCallbackMethod="POST" /></Start>'
+        "<Connect>"
+        f'<Stream url="{html.escape(stream_url, quote=True)}">'
+        f'{p("lang", lang)}{p("callSid", call_sid)}{p("from", phone)}{p("to", to)}{p("direction", direction)}'
         "</Stream></Connect></Response>"
     )
-    print(f"[Twilio] TwiML stream={stream_url}")
+    if call_sid:
+        call_store.upsert(call_sid, phoneNumber=phone, contactName=phone, direction=direction, lang=lang)
+    print(f"[Twilio] TwiML stream={stream_url} call={call_sid}")
     return Response(content=xml, media_type="text/xml")
 
 @app.websocket("/twilio/media")
@@ -78,9 +107,104 @@ async def twilio_call(request: Request):
         return JSONResponse({"error": "to must be E.164 like +49..."}, status_code=400)
     lang = lang if lang in ("tr", "de") else "de"
     from twilio.rest import Client
+    from twilio.base.exceptions import TwilioRestException
     voice_url = f"{public_base(request)}/twilio/voice?lang={lang}"
-    call = Client(sid, token).calls.create(to=to, from_=frm, url=voice_url)
+    rec_cb = f"{public_base(request)}/twilio/recording"
+    try:
+        call = Client(sid, token).calls.create(
+            to=to,
+            from_=frm,
+            url=voice_url,
+            record=True,
+            recording_status_callback=rec_cb,
+            recording_status_callback_event=["completed"],
+        )
+    except TwilioRestException as e:
+        return JSONResponse({"error": str(e.msg or e)}, status_code=400)
+    call_store.upsert(call.sid, phoneNumber=to, contactName=to, direction="outbound", lang=lang)
     return {"sid": call.sid, "status": call.status}
+
+
+def _require_secret(request: Request) -> bool:
+    secret = os.getenv("CALL_SECRET", "")
+    got = request.headers.get("x-call-secret") or request.query_params.get("secret") or ""
+    return bool(secret) and got == secret
+
+
+@app.api_route("/twilio/recording", methods=["GET", "POST"])
+async def twilio_recording(request: Request):
+    form = {}
+    try:
+        form = dict(await request.form())
+    except Exception:
+        await request.body()
+    call_sid = str(form.get("CallSid") or "")
+    rec_url = str(form.get("RecordingUrl") or "")
+    if call_sid and rec_url:
+        call_store.set_recording(call_sid, rec_url)
+        print(f"[Twilio] recording saved for {call_sid}")
+    return Response(content="ok", media_type="text/plain")
+
+
+@app.get("/api/calls")
+async def api_calls(request: Request):
+    if not _require_secret(request):
+        return JSONResponse({"error": "unauthorized"}, status_code=401)
+    q = (request.query_params.get("q") or "").lower()
+    items = call_store.list_calls()
+    if q:
+        items = [c for c in items if q in (c.get("phoneNumber") or "").lower() or q in (c.get("transcriptPreview") or "").lower()]
+    return {"count": len(items), "calls": items}
+
+
+@app.get("/api/calls/{call_id}")
+async def api_call_one(call_id: str, request: Request):
+    if not _require_secret(request):
+        return JSONResponse({"error": "unauthorized"}, status_code=401)
+    row = call_store.get_call(call_id)
+    if not row:
+        return JSONResponse({"error": "not found"}, status_code=404)
+    return row
+
+
+@app.get("/api/recordings")
+async def api_recordings(request: Request):
+    if not _require_secret(request):
+        return JSONResponse({"error": "unauthorized"}, status_code=401)
+    recs = []
+    for c in call_store.list_calls():
+        if not c.get("twilioRecordingUrl") and not c.get("recordingUrl"):
+            continue
+        recs.append({
+            "id": c["id"],
+            "callId": c["id"],
+            "phoneNumber": c.get("phoneNumber") or "",
+            "contactName": c.get("contactName") or c.get("phoneNumber") or "",
+            "createdAt": c.get("startedAt"),
+            "durationSec": c.get("durationSec") or 0,
+            "url": f"/api/calls/{c['id']}/recording",
+            "sizeKb": 0,
+        })
+    return {"count": len(recs), "recordings": recs}
+
+
+@app.get("/api/calls/{call_id}/recording")
+async def api_call_recording(call_id: str, request: Request):
+    if not _require_secret(request):
+        return JSONResponse({"error": "unauthorized"}, status_code=401)
+    row = call_store.get_call(call_id)
+    url = (row or {}).get("twilioRecordingUrl")
+    if not url:
+        return JSONResponse({"error": "no recording"}, status_code=404)
+    import httpx
+    sid = os.getenv("TWILIO_ACCOUNT_SID", "")
+    token = os.getenv("TWILIO_AUTH_TOKEN", "")
+    audio_url = url if url.endswith(".mp3") else url + ".mp3"
+    async with httpx.AsyncClient(auth=(sid, token), timeout=60, follow_redirects=True) as client:
+        r = await client.get(audio_url)
+    if r.status_code >= 400:
+        return JSONResponse({"error": "twilio recording fetch failed"}, status_code=502)
+    return Response(content=r.content, media_type="audio/mpeg")
 
 class Session:
     def __init__(self, ws: WebSocket, lang: str = "de"):
