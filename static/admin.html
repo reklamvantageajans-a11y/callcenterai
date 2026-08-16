@@ -6,26 +6,56 @@
   <title>VK Control</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;650;700&display=swap" rel="stylesheet">
   <style>
-    :root{--bg:#f4f5f7;--sf:#fff;--line:#e8eaed;--mu:#8b919c;--tx:#111318;--side:#111827;--act:#1f2937;--br:#4f46e5;--ok:#15803d;--no:#b91c1c}
+    :root{--bg:#f4f5f8;--sf:#fff;--line:#e6e8ee;--mu:#6b7280;--tx:#0f172a;--br:#4f46e5;--ok:#0f766e;--no:#b91c1c}
     *{box-sizing:border-box;margin:0;padding:0}
     body{font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;display:flex}
-    aside{width:228px;background:var(--side);color:#9ca3af;display:flex;flex-direction:column;flex-shrink:0}
-    .brand{padding:22px 18px 16px;color:#fff;font-weight:650;font-size:15px;letter-spacing:-.02em}
-    .brand small{display:block;color:#6b7280;font-weight:500;font-size:11px;margin-top:3px}
-    nav{flex:1;padding:4px 10px 16px;overflow:auto}
-    nav button{width:100%;text-align:left;background:0;border:0;color:#9ca3af;padding:9px 12px;border-radius:8px;font:inherit;font-size:13px;font-weight:500;cursor:pointer;margin-bottom:1px}
-    nav button.on,nav button:hover{background:var(--act);color:#fff}
+    aside{width:248px;background:#0b1020;color:#8b95a8;display:flex;flex-direction:column;flex-shrink:0;border-right:1px solid rgba(255,255,255,.06)}
+    .brand{display:flex;align-items:center;gap:12px;padding:20px 18px;border-bottom:1px solid rgba(255,255,255,.06)}
+    .mark{width:32px;height:32px;border-radius:9px;background:linear-gradient(145deg,#6366f1,#4338ca);color:#fff;display:grid;place-items:center;font-weight:700;font-size:13px;letter-spacing:-.04em;box-shadow:0 10px 22px rgba(79,70,229,.28)}
+    .brand b{display:block;color:#f8fafc;font-size:14px;font-weight:600;letter-spacing:-.02em}
+    .brand small{display:block;color:#64748b;font-weight:500;font-size:11px;margin-top:1px}
+    nav{flex:1;padding:8px 10px 16px;overflow:auto}
+    .nav-g{margin-bottom:10px}
+    .nav-l{font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#4b5568;padding:10px 10px 6px}
+    nav button{width:100%;display:flex;align-items:center;gap:10px;text-align:left;background:0;border:0;color:#8b95a8;padding:8px 10px;border-radius:8px;font:inherit;font-size:13px;font-weight:500;cursor:pointer;margin-bottom:1px}
+    nav button svg{width:16px;height:16px;flex-shrink:0;opacity:.8}
+    nav button:hover{background:rgba(255,255,255,.045);color:#e2e8f0}
+    nav button.on{background:rgba(255,255,255,.07);color:#fff;box-shadow:inset 2px 0 0 #818cf8}
+    nav button.on svg{opacity:1}
+    .side-foot{margin:10px 12px 16px;padding:11px 12px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:10px}
+    .av{width:30px;height:30px;border-radius:50%;background:#1a2236;color:#e2e8f0;display:grid;place-items:center;font-size:11px;font-weight:650}
+    .side-foot b{display:block;color:#e5e7eb;font-size:12.5px;font-weight:600}
+    .side-foot span{font-size:11px;color:#64748b}
+    .dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#34d399;margin-right:5px;vertical-align:middle}
     main{flex:1;min-width:0;display:flex;flex-direction:column}
-    header{background:#fff;border-bottom:1px solid var(--line);padding:12px 22px;display:flex;justify-content:space-between;align-items:center;gap:12px}
-    header h1{font-size:15px;font-weight:650}
-    .hdr-right{display:flex;align-items:center;gap:12px}
-    #clock{font-variant-numeric:tabular-nums;font-size:13px;font-weight:600;color:#374151;white-space:nowrap}
-    .pin{border:1px solid var(--line);border-radius:8px;padding:7px 10px;font:inherit;font-size:12px;width:128px;background:#fafafa}
-    .wrap{padding:20px 22px;overflow:auto}
-    .g4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
-    .stat{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 16px}
-    .stat em{display:block;font-style:normal;font-size:11px;color:var(--mu);font-weight:600;letter-spacing:.04em;text-transform:uppercase}
-    .stat b{display:block;font-size:22px;margin-top:6px;letter-spacing:-.03em}
+    header{background:#fff;border-bottom:1px solid var(--line);padding:14px 28px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+    header h1{font-size:16px;font-weight:600;letter-spacing:-.02em}
+    header .sub{font-size:12px;color:var(--mu);margin-top:2px}
+    .hdr-right{display:flex;align-items:center;gap:10px}
+    .clock-box{text-align:right}
+    #clock{font-variant-numeric:tabular-nums;font-size:13px;font-weight:600;color:#111827;white-space:nowrap}
+    #clock-tz{display:block;font-size:10px;color:#94a3b8;margin-top:1px}
+    .pin{border:1px solid var(--line);border-radius:8px;padding:8px 10px;font:inherit;font-size:12px;width:120px;background:#fafafa}
+    .wrap{padding:22px 28px;overflow:auto}
+    .kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}
+    .kpi-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 18px;display:flex;gap:14px;align-items:flex-start}
+    .kpi-ico{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;flex-shrink:0}
+    .kpi-ico svg{width:18px;height:18px}
+    .i-ind{background:#eef2ff;color:#4f46e5}.i-teal{background:#f0fdfa;color:#0f766e}.i-amber{background:#fffbeb;color:#b45309}.i-slate{background:#f1f5f9;color:#475569}
+    .kpi-card em{display:block;font-style:normal;font-size:12px;color:var(--mu);font-weight:500}
+    .kpi-card b{display:block;font-size:26px;margin-top:4px;letter-spacing:-.04em;font-variant-numeric:tabular-nums;font-weight:650}
+    .hours-wrap{padding-top:4px}
+    .hours{display:flex;align-items:flex-end;gap:3px;height:88px}
+    .hours i{flex:1;background:#e0e7ff;border-radius:3px 3px 0 0;min-height:3px;display:block}
+    .hours i.peak{background:#4f46e5}
+    .hours-l{display:flex;justify-content:space-between;font-size:10px;color:#94a3b8;margin-top:6px;font-variant-numeric:tabular-nums}
+    .dash-grid{display:grid;grid-template-columns:1.55fr .95fr;gap:14px}
+    .card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+    .card-head .btn{padding:6px 10px;font-size:12px;font-weight:500}
+    .feed .item{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid #f3f4f6;font-size:12.5px;line-height:1.4}
+    .feed .item:last-child{border-bottom:0}
+    .feed .item b{font-weight:500;color:#111827}
+    .feed .item small{display:block;color:#94a3b8;font-size:11px;margin-top:2px}
     .card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px;margin-bottom:14px}
     h3{font-size:14px;font-weight:650;margin-bottom:12px}
     label{display:block;font-size:12px;font-weight:600;color:#4b5563;margin:12px 0 6px}
@@ -53,29 +83,59 @@
     .x{border:0;background:0;color:var(--mu);cursor:pointer;font-size:16px}
     .hint{font-size:12px;color:var(--mu);line-height:1.5;margin-top:6px}
     .file{font-size:12px;color:#4b5563}
-    @media(max-width:900px){body{flex-direction:column}aside{width:100%;flex-direction:row;overflow:auto;min-height:auto}nav{display:flex}.brand{display:none}.g4,.split,.voices{grid-template-columns:1fr 1fr}#clock{display:none}}
+    @media(max-width:980px){body{flex-direction:column}aside{width:100%;flex-direction:row;overflow:auto;min-height:auto}.brand,.side-foot,.nav-l{display:none}nav{display:flex;padding:8px}.kpi,.split,.voices,.dash-grid{grid-template-columns:1fr 1fr}#clock-tz{display:none}}
   </style>
 </head>
 <body>
 <aside>
-  <div class="brand">VK Control<small id="brandSub">Voice operations</small></div>
+  <div class="brand">
+    <div class="mark">K</div>
+    <div><b>Kalmaz</b><small data-i="brandSub">Operations</small></div>
+  </div>
   <nav id="nav"></nav>
+  <div class="side-foot">
+    <div class="av">K</div>
+    <div><b>Kalmaz</b><span><i class="dot"></i><span data-i="online">Online</span></span></div>
+  </div>
 </aside>
 <main>
   <header>
-    <h1 id="title"></h1>
+    <div>
+      <h1 id="title"></h1>
+      <div class="sub" id="subtitle"></div>
+    </div>
     <div class="hdr-right">
-      <div id="clock"></div>
+      <div class="clock-box">
+        <div id="clock"></div>
+        <span id="clock-tz"></span>
+      </div>
       <input class="pin" id="secret" type="password" autocomplete="current-password">
     </div>
   </header>
   <div class="wrap">
-    <section id="dash"><div class="g4">
-      <div class="stat"><em data-i="sCalls"></em><b id="s-total">0</b></div>
-      <div class="stat"><em data-i="sActive"></em><b id="s-act">0</b></div>
-      <div class="stat"><em data-i="sCamp"></em><b id="s-cmp">0</b></div>
-      <div class="stat"><em>Drive</em><b id="s-drv" style="font-size:15px;padding-top:8px">—</b></div>
-    </div></section>
+    <section id="dash">
+      <div class="kpi">
+        <div class="kpi-card"><div class="kpi-ico i-ind"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.37 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.33 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div><div><em data-i="sCalls"></em><b id="s-total">0</b></div></div>
+        <div class="kpi-card"><div class="kpi-ico i-teal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div><div><em data-i="sActive"></em><b id="s-act">0</b></div></div>
+        <div class="kpi-card"><div class="kpi-ico i-amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg></div><div><em data-i="sCamp"></em><b id="s-cmp">0</b></div></div>
+        <div class="kpi-card"><div class="kpi-ico i-slate"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 7h18M3 12h18M3 17h18"/></svg></div><div><em data-i="sAnswered"></em><b id="s-ok">0</b></div></div>
+      </div>
+      <div class="card hours-wrap">
+        <div class="card-head"><h3 data-i="hourly"></h3><span class="msg" id="s-rate" style="margin:0"></span></div>
+        <div class="hours" id="hours"></div>
+        <div class="hours-l"><span>00</span><span>06</span><span>12</span><span>18</span><span>23</span></div>
+      </div>
+      <div class="dash-grid">
+        <div class="card">
+          <div class="card-head"><h3 data-i="recent"></h3><button class="btn ghost" onclick="tab('calls')" data-i="showAll"></button></div>
+          <table><thead><tr><th data-i="number"></th><th data-i="dir"></th><th>Status</th><th data-i="time"></th></tr></thead><tbody id="dash-calls"></tbody></table>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3 data-i="activity"></h3></div>
+          <div class="feed" id="dash-logs"></div>
+        </div>
+      </div>
+    </section>
 
     <section id="dial" class="card" hidden>
       <h3 data-i="dial"></h3>
@@ -190,14 +250,33 @@
 <script>
 const I18N={
 tr:{
-  dash:'Özet',dial:'Arama',nums:'Numaralar',camp:'Kampanya',calls:'Görüşmeler',recs:'Kayıtlar',voice:'Ses',open:'Açılış',pref:'Panel',cb:'Geri arama',dnc:'Yasak liste',drive:'Drive',logs:'Olaylar',
-  sCalls:'Görüşme',sActive:'Aktif',sCamp:'Kampanya',number:'Numara',callLang:'Görüşme dili',callBtn:'Ara',bulkAdd:'Toplu ekle',paste:'Liste',addList:'Rehbere ekle',leads:'Rehber',dialList:'Seçilenleri ara',name:'Ad',parallel:'Paralel',start:'Başlat',dir:'Yön',time:'Saat',save:'Kaydet',add:'Ekle',note:'Not',uiLang:'Panel dili',tz:'Saat dilimi',clockFmt:'Saat biçimi',listen:'Dinle',female:'Kadın',male:'Erkek',neutral:'Nötr',in:'Gelen',out:'Giden',pin:'Giriş',selectAll:'Tümünü seç',clearList:'Listeyi sil',bulkHint:'Her satıra bir numara. Excel/CSV yapıştırılabilir. 05… Türkiye, 0… Almanya olarak tamamlanır. Yinelenenler atlanır.',search:'Ara'
+  dash:'Özet',dial:'Arama',nums:'Numaralar',camp:'Kampanya',calls:'Görüşmeler',recs:'Kayıtlar',voice:'Ses',open:'Açılış',pref:'Ayarlar',cb:'Geri arama',dnc:'Yasak liste',drive:'Drive',logs:'Olaylar',
+  gOps:'Operasyon',gLib:'Kayıt',gSys:'Sistem',brandSub:'Operations',online:'Çevrimiçi',
+  sCalls:'Bugün',sActive:'Aktif hat',sCamp:'Kampanya',sAnswered:'Açılan',hourly:'Saatlik dağılım',recent:'Son görüşmeler',activity:'Canlı akış',showAll:'Tümü',
+  number:'Numara',callLang:'Görüşme dili',callBtn:'Ara',bulkAdd:'Toplu ekle',paste:'Liste',addList:'Rehbere ekle',leads:'Rehber',dialList:'Seçilenleri ara',name:'Ad',parallel:'Paralel',start:'Başlat',dir:'Yön',time:'Saat',save:'Kaydet',add:'Ekle',note:'Not',uiLang:'Panel dili',tz:'Saat dilimi',clockFmt:'Saat biçimi',listen:'Dinle',female:'Kadın',male:'Erkek',neutral:'Nötr',in:'Gelen',out:'Giden',pin:'Giriş',selectAll:'Tümünü seç',clearList:'Listeyi sil',bulkHint:'Her satıra bir numara. Excel/CSV yapıştırılabilir. 05… Türkiye, 0… Almanya olarak tamamlanır. Yinelenenler atlanır.',search:'Ara'
 },
 de:{
-  dash:'Übersicht',dial:'Anruf',nums:'Nummern',camp:'Kampagne',calls:'Gespräche',recs:'Aufnahmen',voice:'Stimme',open:'Begrüßung',pref:'Panel',cb:'Rückrufe',dnc:'Sperrliste',drive:'Drive',logs:'Ereignisse',
-  sCalls:'Gespräche',sActive:'Aktiv',sCamp:'Kampagnen',number:'Nummer',callLang:'Gesprächssprache',callBtn:'Anrufen',bulkAdd:'Sammelimport',paste:'Liste',addList:'Übernehmen',leads:'Bestand',dialList:'Auswahl anrufen',name:'Name',parallel:'Parallel',start:'Start',dir:'Richtung',time:'Zeit',save:'Speichern',add:'Hinzufügen',note:'Notiz',uiLang:'Panelsprache',tz:'Zeitzone',clockFmt:'Uhrformat',listen:'Anhören',female:'Weiblich',male:'Männlich',neutral:'Neutral',in:'Eingehend',out:'Ausgehend',pin:'Zugang',selectAll:'Alle',clearList:'Liste leeren',bulkHint:'Eine Nummer pro Zeile. Excel/CSV möglich. 05… Türkei, 0… Deutschland. Duplikate werden übersprungen.',search:'Suche'
+  dash:'Übersicht',dial:'Anruf',nums:'Nummern',camp:'Kampagne',calls:'Gespräche',recs:'Aufnahmen',voice:'Stimme',open:'Begrüßung',pref:'Einstellungen',cb:'Rückrufe',dnc:'Sperrliste',drive:'Drive',logs:'Ereignisse',
+  gOps:'Betrieb',gLib:'Archiv',gSys:'System',brandSub:'Operations',online:'Online',
+  sCalls:'Heute',sActive:'Aktiv',sCamp:'Kampagnen',sAnswered:'Angenommen',hourly:'Anrufe je Stunde',recent:'Letzte Gespräche',activity:'Aktivität',showAll:'Alle',
+  number:'Nummer',callLang:'Gesprächssprache',callBtn:'Anrufen',bulkAdd:'Sammelimport',paste:'Liste',addList:'Übernehmen',leads:'Bestand',dialList:'Auswahl anrufen',name:'Name',parallel:'Parallel',start:'Start',dir:'Richtung',time:'Zeit',save:'Speichern',add:'Hinzufügen',note:'Notiz',uiLang:'Panelsprache',tz:'Zeitzone',clockFmt:'Uhrformat',listen:'Anhören',female:'Weiblich',male:'Männlich',neutral:'Neutral',in:'Eingehend',out:'Ausgehend',pin:'Zugang',selectAll:'Alle',clearList:'Liste leeren',bulkHint:'Eine Nummer pro Zeile. Excel/CSV möglich. 05… Türkei, 0… Deutschland. Duplikate werden übersprungen.',search:'Suche'
 }}
-const NAV=['dash','dial','nums','camp','calls','recs','voice','open','pref','cb','dnc','drive','logs']
+const ICO={
+dash:'<path d="M3 3h8v8H3zM13 3h8v5h-8zM13 10h8v11h-8zM3 13h8v8H3z"/>',
+dial:'<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.37 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.33 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/>',
+nums:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>',
+camp:'<path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/>',
+calls:'<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>',
+recs:'<path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/>',
+voice:'<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>',
+open:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
+pref:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9c.3.7 1 1.2 1.8 1.2H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>',
+cb:'<polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>',
+dnc:'<circle cx="12" cy="12" r="10"/><path d="M4.9 4.9l14.2 14.2"/>',
+drive:'<path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>',
+logs:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/>'
+}
+const GROUPS=[{k:'gOps',ids:['dash','dial','nums','camp','calls']},{k:'gLib',ids:['recs','voice','open','cb','dnc']},{k:'gSys',ids:['pref','drive','logs']}]
 let ui='tr', tz='Europe/Istanbul', clockFmt='24h', contacts=[]
 const t=k=>(I18N[ui]&&I18N[ui][k])||k
 const loc=()=>ui==='tr'?'tr-TR':'de-DE'
@@ -207,16 +286,18 @@ secretEl.onchange=()=>localStorage.setItem('call_secret',secretEl.value.trim())
 const secret=()=>secretEl.value.trim()
 const H=()=>({'Content-Type':'application/json','x-call-secret':secret()})
 let currentTab='dash'
+const svg=d=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`
 
 function applyUi(){
   document.documentElement.lang=ui
-  document.getElementById('nav').innerHTML=NAV.map(id=>`<button data-t="${id}" onclick="tab('${id}')">${t(id)}</button>`).join('')
+  document.getElementById('nav').innerHTML=GROUPS.map(g=>`<div class="nav-g"><div class="nav-l">${t(g.k)}</div>${g.ids.map(id=>`<button data-t="${id}" onclick="tab('${id}')">${svg(ICO[id])}<span>${t(id)}</span></button>`).join('')}</div>`).join('')
   document.querySelectorAll('[data-i]').forEach(el=>el.textContent=t(el.getAttribute('data-i')))
   secretEl.placeholder=t('pin')
   const q=document.getElementById('q'); if(q) q.placeholder=t('search')
   const cq=document.getElementById('cq'); if(cq) cq.placeholder=t('search')
   document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===currentTab))
   document.getElementById('title').textContent=t(currentTab)
+  const sub=document.getElementById('subtitle'); if(sub) sub.textContent=tz.replace('_',' ')
 }
 function tab(id){
   currentTab=id
@@ -224,6 +305,13 @@ function tab(id){
   document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===id))
   document.getElementById('title').textContent=t(id)
   refresh()
+}
+function openCall(id){
+  currentTab='calls'
+  document.querySelectorAll('section').forEach(s=>s.hidden=s.id!=='calls')
+  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t==='calls'))
+  document.getElementById('title').textContent=t('calls')
+  show(id)
 }
 function timeOpts(extra){
   return Object.assign({timeZone:tz,hour:'2-digit',minute:'2-digit',hour12:clockFmt==='12h'}, extra||{})
@@ -235,6 +323,7 @@ function fmt(iso){
 function tick(){
   const now=new Date()
   document.getElementById('clock').textContent=now.toLocaleString(loc(),timeOpts({weekday:'short',day:'2-digit',month:'short',second:'2-digit'}))
+  const z=document.getElementById('clock-tz'); if(z) z.textContent=tz
 }
 setInterval(tick,1000); tick()
 
@@ -291,9 +380,17 @@ async function refresh(){if(!secret())return;try{await Promise.all([loadCalls(),
 async function loadStats(){
   const s=await j('/api/stats'); const c=await j('/api/campaigns')
   document.getElementById('s-total').textContent=s.totalToday||0
-  document.getElementById('s-act').textContent=(s.dialer&&s.dialer.active)||0
+  document.getElementById('s-act').textContent=(s.dialer&&s.dialer.active)||s.activeNow||0
   document.getElementById('s-cmp').textContent=(c.campaigns||[]).length
-  document.getElementById('s-drv').textContent=(s.drive&&s.drive.configured)?'●':'—'
+  document.getElementById('s-ok').textContent=s.answered||0
+  const rate=document.getElementById('s-rate')
+  if(rate) rate.textContent=(s.conversionRate||0)+'%'
+  const hours=s.hourly||[]
+  const max=Math.max(1,...hours.map(h=>h.calls||0))
+  document.getElementById('hours').innerHTML=hours.map(h=>{
+    const pct=Math.max(6,Math.round(100*(h.calls||0)/max))
+    return `<i class="${(h.calls||0)===max&&max>0?'peak':''}" style="height:${pct}%" title="${h.hour}:00 · ${h.calls||0}"></i>`
+  }).join('')
 }
 async function loadContacts(){
   const d=await j('/api/contacts')
@@ -311,6 +408,7 @@ async function loadCalls(){
   const q=document.getElementById('q')?.value||''
   const d=await j('/api/calls?q='+encodeURIComponent(q))
   document.getElementById('tbody').innerHTML=(d.calls||[]).map(c=>`<tr class="click" onclick="show('${c.id}')"><td style="font-variant-numeric:tabular-nums;font-weight:600">${c.phoneNumber||''}</td><td>${c.direction==='outbound'?t('out'):t('in')}</td><td>${(c.lang||'').toUpperCase()}</td><td>${c.outcome||c.status||''}</td><td>${fmt(c.startedAt)}</td></tr>`).join('')
+  document.getElementById('dash-calls').innerHTML=(d.calls||[]).slice(0,8).map(c=>`<tr class="click" onclick="openCall('${c.id}')"><td style="font-variant-numeric:tabular-nums;font-weight:600">${c.phoneNumber||''}</td><td>${c.direction==='outbound'?t('out'):t('in')}</td><td>${c.outcome||c.status||''}</td><td>${fmt(c.startedAt)}</td></tr>`).join('')||`<tr><td colspan="4" class="msg">—</td></tr>`
   document.getElementById('reclist').innerHTML=(d.calls||[]).filter(c=>c.twilioRecordingUrl||c.driveUrl).map(c=>`<div class="card"><div style="font-weight:600;margin-bottom:8px">${c.phoneNumber} · ${fmt(c.startedAt)}</div><audio controls preload="none" src="/api/calls/${c.id}/recording?secret=${encodeURIComponent(secret())}"></audio></div>`).join('')||`<div class="card msg">—</div>`
 }
 async function show(id){
@@ -369,7 +467,12 @@ async function addCb(){await j('/api/callbacks',{method:'POST',body:JSON.stringi
 async function loadCbs(){const d=await j('/api/callbacks');document.getElementById('cblist').innerHTML=(d.callbacks||[]).map(x=>`<div class="msg"><b>${x.phoneNumber}</b> · ${fmt(x.scheduledAt)} · ${x.reason||''}</div>`).join('')||'—'}
 async function addDnc(){await j('/api/dnc',{method:'POST',body:JSON.stringify({phone:document.getElementById('dncp').value})});loadDnc()}
 async function loadDnc(){const d=await j('/api/dnc');document.getElementById('dncl').textContent=(d.numbers||[]).join('  ·  ')||'—'}
-async function loadLogs(){const d=await j('/api/logs');document.getElementById('logl').innerHTML=(d.logs||[]).map(l=>`<div class="msg">${fmt(l.ts)} · ${l.source} — ${l.message}</div>`).join('')}
+async function loadLogs(){
+  const d=await j('/api/logs')
+  const items=d.logs||[]
+  document.getElementById('logl').innerHTML=items.map(l=>`<div class="msg">${fmt(l.ts)} · ${l.source} — ${l.message}</div>`).join('')
+  document.getElementById('dash-logs').innerHTML=items.slice(0,10).map(l=>`<div class="item"><div><b>${l.message||''}</b><small>${fmt(l.ts)} · ${l.source||''}</small></div></div>`).join('')||'<div class="msg">—</div>'
+}
 async function loadDrive(){const d=await j('/api/drive');document.getElementById('drvtxt').textContent=d.configured?'●':'—'}
 
 applyUi()

@@ -56,22 +56,22 @@ export function StatCard({
   const animated = useCountUp(value);
   const c = CHIP[tone];
   return (
-    <div className="card animate-slideUp p-5 transition-shadow hover:shadow-cardHover">
-      <div className="mb-4 flex items-center justify-between">
-        <p className="text-[13px] font-medium text-subtle">{label}</p>
-        <span className={`flex h-8 w-8 items-center justify-center rounded-lg ${c.icon}`}>
-          <Icon className="h-4 w-4" />
+    <div className="rounded-[14px] border border-border bg-white p-5">
+      <div className="mb-3 flex items-center justify-between">
+        <p className="text-[12px] font-medium text-subtle">{label}</p>
+        <span className={`flex h-9 w-9 items-center justify-center rounded-[10px] ${c.icon}`}>
+          <Icon className="h-[18px] w-[18px]" strokeWidth={1.75} />
         </span>
       </div>
       <div className="flex items-baseline gap-1">
-        <span className={`num text-3xl font-bold ${c.num}`}>
+        <span className={`num text-[26px] font-semibold tracking-tight ${c.num}`}>
           {animated.toFixed(decimals)}
         </span>
-        {suffix && <span className="text-base font-medium text-muted">{suffix}</span>}
+        {suffix && <span className="text-sm font-medium text-muted">{suffix}</span>}
       </div>
       {hint && (
-        <div className="mt-1.5 flex items-center gap-1.5 text-xs text-muted">
-          {live && <span className="h-1.5 w-1.5 rounded-full bg-success animate-blink" />}
+        <div className="mt-1.5 flex items-center gap-1.5 text-[11px] text-muted">
+          {live && <span className="h-1.5 w-1.5 rounded-full bg-success" />}
           {hint}
         </div>
       )}

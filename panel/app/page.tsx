@@ -57,11 +57,11 @@ export default function DashboardPage() {
           {s && <HourlyChart data={s.hourly} />}
         </div>
 
-        <div className="card flex flex-col p-5">
+        <div className="card flex min-h-[280px] flex-col p-5">
           <div className="mb-3 flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-text">{t("activity")}</h3>
-            <span className="flex items-center gap-1.5 text-[11px] font-medium text-success">
-              <span className="h-1.5 w-1.5 rounded-full bg-success animate-blink" />
+            <h3 className="text-sm font-semibold tracking-tight text-text">{t("activity")}</h3>
+            <span className="flex items-center gap-1.5 text-[11px] font-medium text-subtle">
+              <span className="h-1.5 w-1.5 rounded-full bg-success" />
               {t("live")}
             </span>
           </div>
@@ -81,7 +81,7 @@ export default function DashboardPage() {
 
       <div className="card p-5">
         <div className="mb-3 flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-text">{t("recent")}</h3>
+          <h3 className="text-sm font-semibold tracking-tight text-text">{t("recent")}</h3>
           <a href="/calls" className="text-xs font-medium text-brand hover:underline">
             {t("showAll")} →
           </a>

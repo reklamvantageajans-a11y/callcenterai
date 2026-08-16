@@ -17,7 +17,7 @@ export function HourlyChart({ data }: { data: Stats["hourly"] }) {
   return (
     <div className="card p-5">
       <div className="mb-4 flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-text">{t("hourly")}</h3>
+        <h3 className="text-sm font-semibold tracking-tight text-text">{t("hourly")}</h3>
         <div className="flex items-center gap-4 text-xs text-subtle">
           <span className="flex items-center gap-1.5">
             <span className="h-2.5 w-2.5 rounded-sm" style={{ background: "#4f46e5" }} />

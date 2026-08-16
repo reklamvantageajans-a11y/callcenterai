@@ -3,6 +3,7 @@ import re
 import json
 import asyncio
 import html
+from datetime import datetime, timezone
 from dotenv import load_dotenv
 from typing import Optional
 from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
@@ -356,18 +357,39 @@ async def api_stats(request: Request):
     answered = [c for c in items if c.get("status") == "answered"]
     active = [c for c in items if c.get("status") == "in_progress"]
     durations = [c.get("durationSec") or 0 for c in items]
+    conversions = len([c for c in items if c.get("outcome") == "converted"])
     snap = dialer.snapshot()
+    hourly = [{"hour": f"{h:02d}", "calls": 0, "conversions": 0} for h in range(24)]
+    tzname = ops_store.get_settings().get("timezone") or "Europe/Istanbul"
+    try:
+        from zoneinfo import ZoneInfo
+        z = ZoneInfo(tzname)
+    except Exception:
+        z = timezone.utc
+    for c in items:
+        raw = c.get("startedAt") or ""
+        try:
+            dt = datetime.fromisoformat(str(raw).replace("Z", "+00:00"))
+            if dt.tzinfo is None:
+                dt = dt.replace(tzinfo=timezone.utc)
+            h = dt.astimezone(z).hour
+            hourly[h]["calls"] += 1
+            if c.get("outcome") == "converted":
+                hourly[h]["conversions"] += 1
+        except Exception:
+            pass
+    n = len(items)
     return {
-        "totalToday": len(items),
+        "totalToday": n,
         "activeNow": snap.get("active") or len(active),
         "answered": len(answered),
         "missed": len([c for c in items if c.get("status") in ("no_answer", "busy", "missed")]),
         "callbacksPending": len(ops_store.list_callbacks()),
-        "conversions": len([c for c in items if c.get("outcome") == "converted"]),
-        "conversionRate": 0,
+        "conversions": conversions,
+        "conversionRate": round(100.0 * conversions / n, 1) if n else 0,
         "avgDurationSec": int(sum(durations) / len(durations)) if durations else 0,
         "totalTalkTimeSec": sum(durations),
-        "hourly": [],
+        "hourly": hourly,
         "dialer": snap,
         "drive": drive_service.status(),
     }

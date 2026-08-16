@@ -9,7 +9,7 @@
 html { font-size: 16px; }
 
 body {
-  background-color: #f1f5f9 !important;
+  background-color: #f4f5f8 !important;
   color: #0f172a;
   font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -18,7 +18,7 @@ body {
 
 @layer components {
   .card {
-    @apply rounded-xl border border-border bg-surface shadow-card;
+    @apply rounded-[14px] border border-border bg-surface;
   }
   .num {
     font-variant-numeric: tabular-nums;
