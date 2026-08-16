@@ -9,6 +9,7 @@ import { StatCard } from "@/components/StatCard";
 import { HourlyChart } from "@/components/HourlyChart";
 import { OutcomeBadge, LevelBadge } from "@/components/Badges";
 import { fmtClock, fmtDuration } from "@/lib/format";
+import { authHeaders, BACKEND } from "@/lib/backend";
 import type { Call, LogEntry, Stats } from "@/lib/types";
 
 export default function DashboardPage() {
@@ -18,14 +19,15 @@ export default function DashboardPage() {
 
   useEffect(() => {
     const load = async () => {
+      const h = authHeaders();
       const [s, c, l] = await Promise.all([
-        fetch("/api/stats").then((r) => r.json()),
-        fetch("/api/calls").then((r) => r.json()),
-        fetch("/api/logs").then((r) => r.json()),
+        fetch(`${BACKEND}/api/stats`, { headers: h }).then((r) => r.json()),
+        fetch(`${BACKEND}/api/calls`, { headers: h }).then((r) => r.json()),
+        fetch(`${BACKEND}/api/logs`, { headers: h }).then((r) => r.json()),
       ]);
-      setStats(s);
-      setCalls(c.calls.slice(0, 8));
-      setLogs(l.logs.slice(0, 14));
+      setStats(s.error ? null : s);
+      setCalls((c.calls || []).slice(0, 8));
+      setLogs((l.logs || []).slice(0, 14));
     };
     load();
     const t = setInterval(load, 5000);

@@ -10,7 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.websockets import WebSocketState
 from app.services.openai_voice_service import OpenAIVoiceService
 from app.services.twilio_bridge import TwilioSession, load_prompt
-from app.services import call_store
+from app.services import call_store, ops_store, dialer, drive_service
 
 load_dotenv()
 
@@ -34,6 +34,48 @@ async def admin():
 @app.get("/panel")
 async def panel_page():
     return FileResponse("static/admin.html")
+
+def normalize_phone(raw: str) -> str:
+    to = "".join(ch for ch in str(raw or "") if ch.isdigit() or ch == "+")
+    if to.startswith("00"):
+        to = "+" + to[2:]
+    return to
+
+
+def place_outbound_call(to: str, lang: str = "de") -> dict:
+    sid = os.getenv("TWILIO_ACCOUNT_SID", "")
+    token = os.getenv("TWILIO_AUTH_TOKEN", "")
+    frm = os.getenv("TWILIO_PHONE_NUMBER", "")
+    if not (sid and token and frm):
+        raise RuntimeError("twilio env missing")
+    to = normalize_phone(to)
+    if not to.startswith("+"):
+        raise RuntimeError("to must be E.164 like +49...")
+    lang = lang if lang in ("tr", "de") else "de"
+    if to in set(ops_store.list_dnc()):
+        raise RuntimeError("DNC")
+    from twilio.rest import Client
+    from twilio.base.exceptions import TwilioRestException
+    base = (os.getenv("PUBLIC_URL") or os.getenv("RENDER_EXTERNAL_URL") or "https://callcenterai-yxqp.onrender.com").rstrip("/")
+    voice_url = f"{base}/twilio/voice?lang={lang}"
+    rec_cb = f"{base}/twilio/recording"
+    try:
+        call = Client(sid, token).calls.create(
+            to=to, from_=frm, url=voice_url, record=True,
+            recording_status_callback=rec_cb,
+            recording_status_callback_event=["completed"],
+        )
+    except TwilioRestException as e:
+        raise RuntimeError(str(e.msg or e))
+    call_store.upsert(call.sid, phoneNumber=to, contactName=to, direction="outbound", lang=lang)
+    return {"sid": call.sid, "status": call.status}
+
+
+@app.on_event("startup")
+async def _boot():
+    asyncio.create_task(dialer.worker_loop(place_outbound_call))
+    ops_store.add_log("info", "system", "Kontrollpanel hazır")
+
 
 def public_base(request: Request) -> str:
     env = (os.getenv("PUBLIC_URL") or os.getenv("RENDER_EXTERNAL_URL") or "https://callcenterai-yxqp.onrender.com").rstrip("/")
@@ -102,31 +144,16 @@ async def twilio_call(request: Request):
     if not (sid and token and frm):
         return JSONResponse({"error": "twilio env missing"}, status_code=500)
     body = await request.json()
-    to = body.get("to")
+    to = normalize_phone(body.get("to"))
     lang = body.get("lang", "de")
-    to = "".join(ch for ch in str(to) if ch.isdigit() or ch == "+")
-    if to.startswith("00"):
-        to = "+" + to[2:]
     if not to.startswith("+"):
         return JSONResponse({"error": "to must be E.164 like +49..."}, status_code=400)
     lang = lang if lang in ("tr", "de") else "de"
-    from twilio.rest import Client
-    from twilio.base.exceptions import TwilioRestException
-    voice_url = f"{public_base(request)}/twilio/voice?lang={lang}"
-    rec_cb = f"{public_base(request)}/twilio/recording"
     try:
-        call = Client(sid, token).calls.create(
-            to=to,
-            from_=frm,
-            url=voice_url,
-            record=True,
-            recording_status_callback=rec_cb,
-            recording_status_callback_event=["completed"],
-        )
-    except TwilioRestException as e:
-        return JSONResponse({"error": str(e.msg or e)}, status_code=400)
-    call_store.upsert(call.sid, phoneNumber=to, contactName=to, direction="outbound", lang=lang)
-    return {"sid": call.sid, "status": call.status}
+        result = place_outbound_call(to, lang)
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=400)
+    return result
 
 
 def _require_secret(request: Request) -> bool:
@@ -147,7 +174,31 @@ async def twilio_recording(request: Request):
     if call_sid and rec_url:
         call_store.set_recording(call_sid, rec_url)
         print(f"[Twilio] recording saved for {call_sid}")
+        asyncio.create_task(_drive_upload(call_sid, rec_url))
     return Response(content="ok", media_type="text/plain")
+
+
+async def _drive_upload(call_sid: str, rec_url: str):
+    if not drive_service.configured():
+        return
+    try:
+        import httpx
+        sid = os.getenv("TWILIO_ACCOUNT_SID", "")
+        token = os.getenv("TWILIO_AUTH_TOKEN", "")
+        audio_url = rec_url if rec_url.endswith(".mp3") else rec_url + ".mp3"
+        async with httpx.AsyncClient(auth=(sid, token), timeout=90, follow_redirects=True) as client:
+            r = await client.get(audio_url)
+        if r.status_code >= 400:
+            ops_store.add_log("warn", "drive", f"Twilio kayıt indirilemedi {call_sid}")
+            return
+        row = call_store.get_call(call_sid) or {}
+        name = drive_service.filename_for(row.get("phoneNumber") or "", call_sid)
+        link = await asyncio.to_thread(drive_service.upload_mp3, name, r.content)
+        if link:
+            call_store.set_drive_url(call_sid, link)
+            ops_store.add_log("success", "drive", f"Drive'a yüklendi {name}")
+    except Exception as e:
+        ops_store.add_log("error", "drive", str(e)[:200])
 
 
 @app.get("/api/calls")
@@ -209,6 +260,125 @@ async def api_call_recording(call_id: str, request: Request):
     if r.status_code >= 400:
         return JSONResponse({"error": "twilio recording fetch failed"}, status_code=502)
     return Response(content=r.content, media_type="audio/mpeg")
+
+
+@app.get("/api/stats")
+async def api_stats(request: Request):
+    if not _require_secret(request):
+        return JSONResponse({"error": "unauthorized"}, status_code=401)
+    items = call_store.list_calls()
+    answered = [c for c in items if c.get("status") == "answered"]
+    active = [c for c in items if c.get("status") == "in_progress"]
+    durations = [c.get("durationSec") or 0 for c in items]
+    snap = dialer.snapshot()
+    return {
+        "totalToday": len(items),
+        "activeNow": snap.get("active") or len(active),
+        "answered": len(answered),
+        "missed": len([c for c in items if c.get("status") in ("no_answer", "busy", "missed")]),
+        "callbacksPending": len(ops_store.list_callbacks()),
+        "conversions": len([c for c in items if c.get("outcome") == "converted"]),
+        "conversionRate": 0,
+        "avgDurationSec": int(sum(durations) / len(durations)) if durations else 0,
+        "totalTalkTimeSec": sum(durations),
+        "hourly": [],
+        "dialer": snap,
+        "drive": drive_service.status(),
+    }
+
+
+@app.get("/api/logs")
+async def api_logs(request: Request):
+    if not _require_secret(request):
+        return JSONResponse({"error": "unauthorized"}, status_code=401)
+    return {"logs": ops_store.list_logs()}
+
+
+@app.get("/api/campaigns")
+async def api_campaigns(request: Request):
+    if not _require_secret(request):
+        return JSONResponse({"error": "unauthorized"}, status_code=401)
+    return {"campaigns": ops_store.list_campaigns()}
+
+
+@app.post("/api/campaigns")
+async def api_campaigns_create(request: Request):
+    if not _require_secret(request):
+        return JSONResponse({"error": "unauthorized"}, status_code=401)
+    body = await request.json()
+    raw = body.get("numbers") or body.get("text") or ""
+    if isinstance(raw, list):
+        lines = raw
+    else:
+        lines = str(raw).replace(";", "\n").replace(",", "\n").split()
+    numbers = []
+    for line in lines:
+        p = normalize_phone(line)
+        if p.startswith("+") and p not in numbers:
+            numbers.append(p)
+    if not numbers:
+        return JSONResponse({"error": "numara yok"}, status_code=400)
+    row = ops_store.new_campaign(
+        body.get("name") or "Kampagne",
+        body.get("lang") or "de",
+        numbers,
+        body.get("concurrency") or 2,
+    )
+    await dialer.enqueue_campaign(row["id"])
+    return row
+
+
+@app.get("/api/callbacks")
+async def api_callbacks_get(request: Request):
+    if not _require_secret(request):
+        return JSONResponse({"error": "unauthorized"}, status_code=401)
+    return {"callbacks": ops_store.list_callbacks()}
+
+
+@app.post("/api/callbacks")
+async def api_callbacks_post(request: Request):
+    if not _require_secret(request):
+        return JSONResponse({"error": "unauthorized"}, status_code=401)
+    body = await request.json()
+    row = ops_store.add_callback(
+        normalize_phone(body.get("phone") or body.get("phoneNumber") or ""),
+        body.get("reason") or "",
+        body.get("scheduledAt") or ops_store.now_iso(),
+        body.get("priority") or "medium",
+    )
+    return row
+
+
+@app.get("/api/dnc")
+async def api_dnc_get(request: Request):
+    if not _require_secret(request):
+        return JSONResponse({"error": "unauthorized"}, status_code=401)
+    return {"numbers": ops_store.list_dnc()}
+
+
+@app.post("/api/dnc")
+async def api_dnc_post(request: Request):
+    if not _require_secret(request):
+        return JSONResponse({"error": "unauthorized"}, status_code=401)
+    body = await request.json()
+    p = normalize_phone(body.get("phone") or "")
+    return {"numbers": ops_store.add_dnc(p)}
+
+
+@app.get("/api/drive")
+async def api_drive(request: Request):
+    if not _require_secret(request):
+        return JSONResponse({"error": "unauthorized"}, status_code=401)
+    return drive_service.status()
+
+
+@app.post("/api/calls/{call_id}/outcome")
+async def api_outcome(call_id: str, request: Request):
+    if not _require_secret(request):
+        return JSONResponse({"error": "unauthorized"}, status_code=401)
+    body = await request.json()
+    call_store.upsert(call_id, outcome=body.get("outcome") or "in_progress")
+    return {"ok": True}
 
 class Session:
     def __init__(self, ws: WebSocket, lang: str = "de"):

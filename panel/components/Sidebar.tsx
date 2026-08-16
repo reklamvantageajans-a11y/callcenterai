@@ -6,17 +6,21 @@ import {
   LayoutDashboard,
   PhoneCall,
   PhoneForwarded,
+  PhoneOutgoing,
   Mic,
   ScrollText,
   Headset,
+  HardDrive,
   Circle,
 } from "lucide-react";
 
 export const NAV = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/campaigns", label: "Kampagnen", icon: PhoneOutgoing },
   { href: "/calls", label: "Anrufe", icon: PhoneCall },
   { href: "/callbacks", label: "Rückrufe", icon: PhoneForwarded },
   { href: "/recordings", label: "Aufnahmen", icon: Mic },
+  { href: "/drive", label: "Drive", icon: HardDrive },
   { href: "/logs", label: "Logs", icon: ScrollText },
 ];
 

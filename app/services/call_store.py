@@ -100,6 +100,10 @@ def set_recording(call_id: str, twilio_url: str):
     upsert(call_id, twilioRecordingUrl=twilio_url, recordingUrl=f"/api/calls/{call_id}/recording")
 
 
+def set_drive_url(call_id: str, link: str):
+    upsert(call_id, driveUrl=link)
+
+
 def list_calls():
     with _LOCK:
         return _load()

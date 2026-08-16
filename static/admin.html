@@ -6,191 +6,219 @@
   <title>Callcenter Kontrollpanel</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --bg:#f1f5f9; --surface:#fff; --surface2:#f8fafc; --border:#e2e8f0;
-      --muted:#94a3b8; --subtle:#64748b; --text:#0f172a;
-      --side:#1e293b; --sideActive:#334155; --brand:#4f46e5;
-      --success:#16a34a; --danger:#dc2626;
-    }
-    * { box-sizing:border-box; margin:0; padding:0; }
-    body { font-family:Inter,system-ui,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; display:flex; }
-    aside { width:240px; background:var(--side); color:#cbd5e1; display:flex; flex-direction:column; flex-shrink:0; min-height:100vh; }
-    .logo { display:flex; gap:12px; align-items:center; padding:24px 20px; }
-    .mark { width:36px; height:36px; border-radius:8px; background:var(--brand); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px; }
-    .logo strong { display:block; color:#fff; font-size:14px; }
-    .logo span { font-size:11px; color:#64748b; }
-    nav { flex:1; padding:0 12px; }
-    nav button { width:100%; text-align:left; background:transparent; border:none; color:#94a3b8; padding:10px 12px; border-radius:8px; font:inherit; font-size:14px; font-weight:500; cursor:pointer; margin-bottom:2px; }
-    nav button.on, nav button:hover { background:var(--sideActive); color:#f8fafc; }
-    .foot { margin:12px; padding:12px; border-radius:8px; background:#263347; font-size:12px; }
-    .dot { width:7px; height:7px; border-radius:50%; background:#4ade80; display:inline-block; margin-right:6px; }
-    main { flex:1; min-width:0; display:flex; flex-direction:column; }
-    header { background:#fff; border-bottom:1px solid var(--border); padding:16px 24px; display:flex; justify-content:space-between; align-items:center; gap:16px; }
-    header h1 { font-size:16px; }
-    header p { font-size:12px; color:var(--muted); margin-top:2px; }
-    .secret { border:1px solid var(--border); border-radius:8px; padding:8px 10px; font:inherit; font-size:12px; width:160px; background:var(--surface2); }
-    .content { padding:24px; }
-    .grid { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:20px; }
-    .stat { background:#fff; border:1px solid var(--border); border-radius:12px; padding:16px; }
-    .stat .k { font-size:12px; color:var(--subtle); font-weight:500; }
-    .stat .v { font-size:22px; font-weight:700; margin-top:6px; letter-spacing:-.02em; }
-    .card { background:#fff; border:1px solid var(--border); border-radius:12px; padding:18px; box-shadow:0 1px 3px rgba(15,23,42,.06); }
-    label { display:block; font-size:12px; font-weight:600; color:var(--subtle); margin:12px 0 6px; }
-    input, select { width:100%; border:1px solid var(--border); border-radius:8px; padding:10px 12px; font:inherit; font-size:14px; }
-    .btn { border:none; border-radius:8px; padding:11px 16px; font:inherit; font-weight:600; cursor:pointer; }
-    .btn-g { background:#16a34a; color:#fff; width:100%; margin-top:14px; }
-    .btn-g:disabled { opacity:.55; }
-    table { width:100%; border-collapse:collapse; font-size:13px; }
-    th { text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); padding:10px 12px; border-bottom:1px solid var(--border); background:var(--surface2); }
-    td { padding:12px; border-bottom:1px solid #f1f5f9; }
-    tr { cursor:pointer; }
-    tr:hover td { background:var(--surface2); }
-    .badge { font-size:11px; font-weight:600; padding:3px 8px; border-radius:99px; background:#eef2ff; color:var(--brand); }
-    .turn { margin:8px 0; padding:10px 12px; border-radius:10px; font-size:13.5px; line-height:1.5; }
-    .agent { background:#f1f5f9; }
-    .user { background:#dcfce7; }
-    .who { font-size:11px; font-weight:700; color:var(--subtle); margin-bottom:4px; }
-    .msg { font-size:13px; margin-top:10px; min-height:18px; }
-    .ok { color:var(--success); } .err { color:var(--danger); }
-    .dial { max-width:420px; }
-    .rec { display:flex; gap:12px; align-items:center; border:1px solid var(--border); border-radius:12px; padding:12px; margin-bottom:10px; }
-    audio { width:220px; height:32px; }
-    @media (max-width:900px) {
-      body { flex-direction:column; }
-      aside { width:100%; min-height:auto; flex-direction:row; align-items:center; overflow-x:auto; }
-      nav { display:flex; gap:4px; padding:8px; }
-      .logo, .foot { display:none; }
-      .grid { grid-template-columns:1fr 1fr; }
-    }
+    :root{--bg:#f1f5f9;--sf:#fff;--sf2:#f8fafc;--bd:#e2e8f0;--mu:#94a3b8;--su:#64748b;--tx:#0f172a;--side:#1e293b;--act:#334155;--br:#4f46e5;--ok:#16a34a;--no:#dc2626;--wa:#d97706}
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;display:flex}
+    aside{width:232px;background:var(--side);color:#cbd5e1;display:flex;flex-direction:column;flex-shrink:0}
+    .logo{display:flex;gap:12px;align-items:center;padding:22px 18px}
+    .mark{width:36px;height:36px;border-radius:8px;background:var(--br);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px}
+    nav{flex:1;padding:0 10px}
+    nav button{width:100%;text-align:left;background:0;border:0;color:#94a3b8;padding:10px 12px;border-radius:8px;font:inherit;font-size:13.5px;font-weight:500;cursor:pointer;margin-bottom:2px}
+    nav button.on,nav button:hover{background:var(--act);color:#f8fafc}
+    .foot{margin:12px;padding:12px;border-radius:8px;background:#263347;font-size:12px}
+    .dot{width:7px;height:7px;border-radius:50%;background:#4ade80;display:inline-block;margin-right:6px}
+    main{flex:1;min-width:0;display:flex;flex-direction:column}
+    header{background:#fff;border-bottom:1px solid var(--bd);padding:14px 22px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+    header h1{font-size:16px} header p{font-size:12px;color:var(--mu);margin-top:2px}
+    .secret{border:1px solid var(--bd);border-radius:8px;padding:8px 10px;font:inherit;font-size:12px;width:150px;background:var(--sf2)}
+    .content{padding:20px 22px;overflow:auto}
+    .g4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+    .stat{background:#fff;border:1px solid var(--bd);border-radius:12px;padding:14px}
+    .stat .k{font-size:11px;color:var(--su);font-weight:600;text-transform:uppercase;letter-spacing:.03em}
+    .stat .v{font-size:22px;font-weight:700;margin-top:6px}
+    .card{background:#fff;border:1px solid var(--bd);border-radius:12px;padding:16px;margin-bottom:14px}
+    label{display:block;font-size:12px;font-weight:600;color:var(--su);margin:10px 0 6px}
+    input,select,textarea{width:100%;border:1px solid var(--bd);border-radius:8px;padding:10px 12px;font:inherit;font-size:14px;background:#fff}
+    textarea{min-height:140px;font-family:ui-monospace,monospace;font-size:13px}
+    .btn{border:0;border-radius:8px;padding:10px 14px;font:inherit;font-weight:600;cursor:pointer}
+    .btn-g{background:var(--ok);color:#fff}.btn-b{background:var(--br);color:#fff}.btn-w{background:#fff;border:1px solid var(--bd)}
+    table{width:100%;border-collapse:collapse;font-size:13px}
+    th{text-align:left;font-size:11px;text-transform:uppercase;color:var(--mu);padding:8px 10px;border-bottom:1px solid var(--bd);background:var(--sf2)}
+    td{padding:10px;border-bottom:1px solid #f1f5f9;vertical-align:top}
+    tr.click:hover td{background:var(--sf2);cursor:pointer}
+    .badge{font-size:11px;font-weight:600;padding:3px 8px;border-radius:99px;background:#eef2ff;color:var(--br)}
+    .ok{color:var(--ok)}.err{color:var(--no)}.mu{color:var(--su);font-size:13px}
+    .turn{margin:8px 0;padding:10px 12px;border-radius:10px;font-size:13.5px;line-height:1.5}
+    .agent{background:#f1f5f9}.user{background:#dcfce7}
+    .who{font-size:11px;font-weight:700;color:var(--su);margin-bottom:4px}
+    .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+    .chip{font-size:11px;padding:4px 8px;border-radius:6px;background:var(--sf2);border:1px solid var(--bd);cursor:pointer}
+    .bar{height:8px;background:#e2e8f0;border-radius:99px;overflow:hidden;margin-top:8px}
+    .bar>i{display:block;height:100%;background:var(--br)}
+    @media(max-width:900px){body{flex-direction:column}aside{width:100%;min-height:auto;flex-direction:row;overflow:auto}nav{display:flex}.logo,.foot{display:none}.g4{grid-template-columns:1fr 1fr}}
   </style>
 </head>
 <body>
-  <aside>
-    <div class="logo">
-      <div class="mark">VK</div>
-      <div><strong>Callcenter</strong><span>Kontrollpanel</span></div>
-    </div>
-    <nav>
-      <button class="on" data-tab="dash" onclick="tab('dash')">Dashboard</button>
-      <button data-tab="dial" onclick="tab('dial')">Ara</button>
-      <button data-tab="calls" onclick="tab('calls')">Anrufe</button>
-      <button data-tab="recs" onclick="tab('recs')">Aufnahmen</button>
-    </nav>
-    <div class="foot"><span class="dot"></span>System online<br>Agent: <b style="color:#cbd5e1">Kalmaz</b></div>
-  </aside>
-  <main>
-    <header>
-      <div>
-        <h1 id="title">Übersicht</h1>
-        <p>Gelen hat bozulmaz · kayıt ve transkript burada</p>
+<aside>
+  <div class="logo"><div class="mark">VK</div><div><b style="color:#fff;display:block;font-size:14px">Callcenter</b><span style="font-size:11px;color:#64748b">Kontrollpanel</span></div></div>
+  <nav>
+    <button class="on" data-t="dash" onclick="tab('dash')">Dashboard</button>
+    <button data-t="dial" onclick="tab('dial')">Tekli ara</button>
+    <button data-t="camp" onclick="tab('camp')">Toplu arama</button>
+    <button data-t="calls" onclick="tab('calls')">Anrufe</button>
+    <button data-t="recs" onclick="tab('recs')">Aufnahmen</button>
+    <button data-t="cb" onclick="tab('cb')">Rückrufe</button>
+    <button data-t="dnc" onclick="tab('dnc')">DNC / Sperre</button>
+    <button data-t="drive" onclick="tab('drive')">Google Drive</button>
+    <button data-t="logs" onclick="tab('logs')">Logs</button>
+  </nav>
+  <div class="foot"><span class="dot"></span>System online<br>Agent: <b style="color:#e2e8f0">Kalmaz</b></div>
+</aside>
+<main>
+  <header>
+    <div><h1 id="title">Übersicht</h1><p>Twilio + Kalmaz · kayıt, transkript, kampanya</p></div>
+    <input class="secret" id="secret" type="password" placeholder="CALL_SECRET">
+  </header>
+  <div class="content">
+    <section id="dash">
+      <div class="g4">
+        <div class="stat"><div class="k">Anrufe</div><div class="v" id="s-total">0</div></div>
+        <div class="stat"><div class="k">Aktiv</div><div class="v" id="s-act">0</div></div>
+        <div class="stat"><div class="k">Kampagnen</div><div class="v" id="s-cmp">0</div></div>
+        <div class="stat"><div class="k">Drive</div><div class="v" id="s-drv" style="font-size:14px;padding-top:8px">—</div></div>
       </div>
-      <input class="secret" id="secret" type="password" placeholder="CALL_SECRET">
-    </header>
-    <div class="content">
-      <section id="dash">
-        <div class="grid">
-          <div class="stat"><div class="k">Toplam arama</div><div class="v" id="s-total">0</div></div>
-          <div class="stat"><div class="k">Giden</div><div class="v" id="s-out">0</div></div>
-          <div class="stat"><div class="k">Gelen</div><div class="v" id="s-in">0</div></div>
-          <div class="stat"><div class="k">Kayıt</div><div class="v" id="s-rec">0</div></div>
-        </div>
-        <div class="card"><p style="color:var(--subtle);font-size:13px">Son aramalar Anrufe sekmesinde. Dil: giden aramada TR/DE seçin; gelen hat Twilio webhook dilini kullanır.</p></div>
-      </section>
-      <section id="dial" class="card dial" hidden>
-        <h2 style="font-size:16px;margin-bottom:4px">Dış arama</h2>
-        <p style="font-size:13px;color:var(--subtle);margin-bottom:8px">Numara + dil. Karşı taraf açınca Kalmaz konuşur.</p>
-        <label>Numara</label>
-        <input id="to" type="tel" placeholder="+49... veya +90...">
-        <label>Dil</label>
-        <select id="lang"><option value="de">Almanca</option><option value="tr">Türkçe</option></select>
-        <button class="btn btn-g" id="btn" onclick="placeCall()">Ara</button>
-        <div class="msg" id="msg"></div>
-      </section>
-      <section id="calls" class="card" hidden>
-        <table>
-          <thead><tr><th>Nummer</th><th>Richtung</th><th>Dil</th><th>Özet</th></tr></thead>
-          <tbody id="tbody"></tbody>
-        </table>
-        <div id="detail" style="margin-top:16px"></div>
-      </section>
-      <section id="recs" hidden>
-        <div id="reclist"></div>
-      </section>
-    </div>
-  </main>
-  <script>
-    const TITLES = { dash:'Übersicht', dial:'Ara', calls:'Anrufprotokoll', recs:'Aufnahmen' };
-    const secretEl = document.getElementById('secret');
-    secretEl.value = localStorage.getItem('call_secret') || '';
-    secretEl.onchange = () => localStorage.setItem('call_secret', secretEl.value.trim());
-    function secret(){ return secretEl.value.trim(); }
-    function headers(){ return { 'Content-Type':'application/json', 'x-call-secret': secret() }; }
+      <div class="card mu">Sağ üstte CALL_SECRET. Toplu arama aynı numaradan sırayla/az eşzamanlı çalar. Render’da eşzamanlı varsayılan 2.</div>
+    </section>
 
-    function tab(id){
-      document.querySelectorAll('section').forEach(s => s.hidden = s.id !== id);
-      document.querySelectorAll('nav button').forEach(b => b.classList.toggle('on', b.dataset.tab === id));
-      document.getElementById('title').textContent = TITLES[id];
-      if (id !== 'dial') loadCalls();
-    }
+    <section id="dial" class="card" hidden>
+      <h3>Tek numara</h3>
+      <label>Nummer</label><input id="to" placeholder="+49... / +90...">
+      <label>Sprache</label><select id="lang"><option value="de">Deutsch</option><option value="tr">Türkçe</option></select>
+      <button class="btn btn-g" style="margin-top:12px" id="btn" onclick="placeCall()">Anrufen</button>
+      <div id="msg" class="mu" style="margin-top:10px"></div>
+    </section>
 
-    async function placeCall(){
-      const btn = document.getElementById('btn');
-      const msg = document.getElementById('msg');
-      let to = document.getElementById('to').value.replace(/[\s()-]/g,'');
-      const lang = document.getElementById('lang').value;
-      msg.className = 'msg'; msg.textContent = '';
-      if (!secret() || !to){ msg.className='msg err'; msg.textContent='Şifre ve numara gerekli.'; return; }
-      if (!to.startsWith('+')) to = '+' + to.replace(/^00/,'');
-      localStorage.setItem('call_secret', secret());
-      btn.disabled = true; btn.textContent = 'Aranıyor...';
-      try {
-        const res = await fetch('/twilio/call', { method:'POST', headers: headers(), body: JSON.stringify({ to, lang }) });
-        const data = await res.json();
-        if (!res.ok){ msg.className='msg err'; msg.textContent = data.error === 'unauthorized' ? 'Şifre hatalı.' : (data.error || 'Başlatılamadı'); }
-        else { msg.className='msg ok'; msg.textContent = 'Arama başladı · ' + (lang==='tr'?'Türkçe':'Almanca'); loadCalls(); }
-      } catch(e){ msg.className='msg err'; msg.textContent='Bağlantı hatası.'; }
-      btn.disabled = false; btn.textContent = 'Ara';
-    }
+    <section id="camp" hidden>
+      <div class="card">
+        <h3>Toplu arama</h3>
+        <p class="mu">Her satıra bir numara. Tek Twilio hattı hepsini çaldırır; aynı anda en fazla 2 (Render).</p>
+        <label>Kampanya adı</label><input id="cname" value="Kampagne 1">
+        <label>Numaralar</label><textarea id="cnums" placeholder="+4917...&#10;+905..."></textarea>
+        <label>Dil</label><select id="clang"><option value="de">Deutsch</option><option value="tr">Türkçe</option></select>
+        <label>Aynı anda</label><select id="cpar"><option>1</option><option selected>2</option></select>
+        <button class="btn btn-b" style="margin-top:12px" onclick="startCamp()">Kampanyayı başlat</button>
+        <div id="cmsg" class="mu" style="margin-top:8px"></div>
+      </div>
+      <div class="card" id="clist"></div>
+    </section>
 
-    let selected = null, cache = [];
-    async function loadCalls(){
-      if (!secret()) return;
-      const res = await fetch('/api/calls', { headers: headers() });
-      if (!res.ok) return;
-      const data = await res.json();
-      cache = data.calls || [];
-      document.getElementById('s-total').textContent = cache.length;
-      document.getElementById('s-out').textContent = cache.filter(c => c.direction==='outbound').length;
-      document.getElementById('s-in').textContent = cache.filter(c => c.direction==='inbound').length;
-      document.getElementById('s-rec').textContent = cache.filter(c => c.twilioRecordingUrl).length;
-      document.getElementById('tbody').innerHTML = cache.map(c => `
-        <tr onclick="showCall('${c.id}')">
-          <td style="font-family:ui-monospace,monospace;font-weight:600">${c.phoneNumber||c.id}</td>
-          <td><span class="badge">${c.direction==='outbound'?'Ausgehend':'Eingehend'}</span></td>
-          <td>${(c.lang||'').toUpperCase()}</td>
-          <td style="color:var(--subtle);max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.transcriptPreview||'—'}</td>
-        </tr>`).join('') || '<tr><td colspan="4" style="color:var(--muted)">Henüz arama yok.</td></tr>';
-      document.getElementById('reclist').innerHTML = cache.filter(c => c.twilioRecordingUrl).map(c => `
-        <div class="rec card">
-          <div style="flex:1"><div style="font-weight:600">${c.phoneNumber}</div><div style="font-size:12px;color:var(--muted)">${c.lang||''}</div></div>
-          <audio controls preload="none" src="/api/calls/${c.id}/recording?secret=${encodeURIComponent(secret())}"></audio>
-        </div>`).join('') || '<div class="card" style="color:var(--muted)">Henüz ses kaydı yok.</div>';
-    }
+    <section id="calls" class="card" hidden>
+      <input id="q" placeholder="Suche Nummer…" oninput="loadCalls()" style="margin-bottom:12px">
+      <table><thead><tr><th>Nummer</th><th>Richtung</th><th>Lang</th><th>Ergebnis</th><th>Vorschau</th></tr></thead><tbody id="tbody"></tbody></table>
+      <div id="detail" style="margin-top:14px"></div>
+    </section>
 
-    async function showCall(id){
-      selected = id;
-      const res = await fetch('/api/calls/'+id, { headers: headers() });
-      if (!res.ok) return;
-      const c = await res.json();
-      const turns = (c.transcript||[]).map(t => `
-        <div class="turn ${t.role}"><div class="who">${t.role==='agent'?'Ajan (Kalmaz)':'Müşteri'}</div>${(t.text||'').replace(/</g,'')}</div>
-      `).join('') || '<p style="color:var(--muted);font-size:13px">Transkript henüz yok — görüşme bitsin.</p>';
-      const rec = c.twilioRecordingUrl ? `<audio controls src="/api/calls/${c.id}/recording?secret=${encodeURIComponent(secret())}"></audio>` : '';
-      document.getElementById('detail').innerHTML = `<h3 style="font-size:14px;margin-bottom:8px">${c.phoneNumber||id}</h3>${turns}${rec}`;
-    }
+    <section id="recs" hidden><div id="reclist"></div></section>
 
-    loadCalls();
-    setInterval(loadCalls, 8000);
-  </script>
+    <section id="cb" hidden>
+      <div class="card">
+        <h3>Rückruf anlegen</h3>
+        <label>Nummer</label><input id="cbp" placeholder="+49...">
+        <label>Grund</label><input id="cbr" placeholder="Kunde bat um 16:00">
+        <button class="btn btn-w" style="margin-top:10px" onclick="addCb()">Speichern</button>
+      </div>
+      <div class="card" id="cblist"></div>
+    </section>
+
+    <section id="dnc" hidden>
+      <div class="card">
+        <h3>Nicht anrufen (DNC)</h3>
+        <p class="mu">Bu listedekiler toplu ve tekli aramada atlanır.</p>
+        <label>Nummer</label><input id="dncp" placeholder="+49...">
+        <button class="btn btn-w" style="margin-top:10px" onclick="addDnc()">Sperre</button>
+        <div id="dncl" class="mu" style="margin-top:12px"></div>
+      </div>
+    </section>
+
+    <section id="drive" class="card" hidden>
+      <h3>Google Drive</h3>
+      <p class="mu" id="drvtxt">Durum yükleniyor…</p>
+      <p class="mu" style="margin-top:10px">Render Environment:<br>
+        <code>GOOGLE_DRIVE_FOLDER_ID</code><br>
+        <code>GOOGLE_SERVICE_ACCOUNT_JSON</code> (servis hesabı JSON)</p>
+      <p class="mu">Klasöre servis hesabı e-postasını <b>Editor</b> olarak ekleyin. Kayıt bitince mp3 Drive’a gider.</p>
+    </section>
+
+    <section id="logs" class="card" hidden><div id="logl"></div></section>
+  </div>
+</main>
+<script>
+const T={dash:'Übersicht',dial:'Tekli ara',camp:'Toplu arama',calls:'Anrufe',recs:'Aufnahmen',cb:'Rückrufe',dnc:'DNC',drive:'Google Drive',logs:'Logs'}
+const secretEl=document.getElementById('secret')
+secretEl.value=localStorage.getItem('call_secret')||''
+secretEl.onchange=()=>localStorage.setItem('call_secret',secretEl.value.trim())
+const secret=()=>secretEl.value.trim()
+const H=()=>({'Content-Type':'application/json','x-call-secret':secret()})
+function tab(id){document.querySelectorAll('section').forEach(s=>s.hidden=s.id!==id);document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===id));document.getElementById('title').textContent=T[id];refresh()}
+async function j(url,opt){const r=await fetch(url,Object.assign({headers:H()},opt||{})); if(r.status===401) throw new Error('şifre'); return r.json()}
+
+async function placeCall(){
+  const btn=document.getElementById('btn'), msg=document.getElementById('msg')
+  let to=document.getElementById('to').value.replace(/[\s()-]/g,'')
+  const lang=document.getElementById('lang').value
+  if(!secret()||!to){msg.textContent='Şifre ve numara';msg.className='err';return}
+  if(!to.startsWith('+')) to='+'+to.replace(/^00/,'')
+  localStorage.setItem('call_secret',secret())
+  btn.disabled=true
+  try{const d=await j('/twilio/call',{method:'POST',body:JSON.stringify({to,lang})});msg.className='ok';msg.textContent='Arama başladı · '+(d.sid||'')}
+  catch(e){msg.className='err';msg.textContent=e.message}
+  btn.disabled=false
+}
+
+async function startCamp(){
+  const msg=document.getElementById('cmsg')
+  try{
+    const d=await j('/api/campaigns',{method:'POST',body:JSON.stringify({name:document.getElementById('cname').value,lang:document.getElementById('clang').value,concurrency:document.getElementById('cpar').value,text:document.getElementById('cnums').value})})
+    msg.className='ok';msg.textContent=d.total+' numara kuyrukta'
+    loadCamps()
+  }catch(e){msg.className='err';msg.textContent=e.message}
+}
+
+let cache=[]
+async function refresh(){if(!secret())return; try{await Promise.all([loadCalls(),loadCamps(),loadCbs(),loadDnc(),loadLogs(),loadDrive(),loadStats()])}catch(e){}}
+
+async function loadStats(){
+  const s=await j('/api/stats')
+  document.getElementById('s-total').textContent=s.totalToday||0
+  document.getElementById('s-act').textContent=(s.dialer&&s.dialer.active)||0
+  document.getElementById('s-cmp').textContent=(await j('/api/campaigns')).campaigns.length
+  document.getElementById('s-drv').textContent=(s.drive&&s.drive.configured)?'Bağlı':'Kapalı'
+}
+
+async function loadCalls(){
+  const q=document.getElementById('q')?document.getElementById('q').value:''
+  const d=await j('/api/calls?q='+encodeURIComponent(q||''))
+  cache=d.calls||[]
+  document.getElementById('tbody').innerHTML=cache.map(c=>`<tr class="click" onclick="show('${c.id}')"><td style="font-family:ui-monospace;font-weight:600">${c.phoneNumber||''}</td><td><span class="badge">${c.direction||''}</span></td><td>${(c.lang||'').toUpperCase()}</td><td>${c.outcome||c.status||''}</td><td class="mu">${(c.transcriptPreview||'—').slice(0,70)}</td></tr>`).join('')||'<tr><td colspan="5" class="mu">Kayıt yok</td></tr>'
+  document.getElementById('reclist').innerHTML=cache.filter(c=>c.twilioRecordingUrl||c.driveUrl).map(c=>`<div class="card"><b>${c.phoneNumber}</b> ${c.driveUrl?' · Drive':''}<br><audio controls preload="none" src="/api/calls/${c.id}/recording?secret=${encodeURIComponent(secret())}"></audio>${c.driveUrl?`<div class="mu"><a href="${c.driveUrl}" target="_blank">Drive’da aç</a></div>`:''}</div>`).join('')||'<div class="card mu">Henüz kayıt yok</div>'
+}
+
+async function show(id){
+  const c=await j('/api/calls/'+id)
+  const turns=(c.transcript||[]).map(t=>`<div class="turn ${t.role}"><div class="who">${t.role==='agent'?'Kalmaz':'Kunde'}</div>${(t.text||'').replace(/</g,'')}</div>`).join('')||'<p class="mu">Transkript yok</p>'
+  const rec=c.twilioRecordingUrl?`<audio controls src="/api/calls/${c.id}/recording?secret=${encodeURIComponent(secret())}"></audio>`:''
+  const chips=['converted','callback','not_interested','no_answer'].map(o=>`<span class="chip" onclick="out('${id}','${o}')">${o}</span>`).join('')
+  document.getElementById('detail').innerHTML=`<h3>${c.phoneNumber}</h3><div class="row">${chips}</div>${turns}${rec}`
+}
+async function out(id,o){await j('/api/calls/'+id+'/outcome',{method:'POST',body:JSON.stringify({outcome:o})});loadCalls()}
+
+async function loadCamps(){
+  const d=await j('/api/campaigns')
+  document.getElementById('clist').innerHTML=(d.campaigns||[]).map(c=>{
+    const pct=c.total?Math.round(100*(c.done||0)/c.total):0
+    return `<div style="margin-bottom:14px"><b>${c.name}</b> · ${c.status} · ${c.lang} · ${c.done||0}/${c.total}<div class="bar"><i style="width:${pct}%"></i></div>
+      ${(c.numbers||[]).slice(0,40).map(n=>`<div class="mu">${n.phone} — ${n.status}${n.error?': '+n.error:''}</div>`).join('')}</div>`
+  }).join('')||'<span class="mu">Kampanya yok</span>'
+}
+
+async function addCb(){await j('/api/callbacks',{method:'POST',body:JSON.stringify({phone:document.getElementById('cbp').value,reason:document.getElementById('cbr').value})});loadCbs()}
+async function loadCbs(){const d=await j('/api/callbacks');document.getElementById('cblist').innerHTML=(d.callbacks||[]).map(x=>`<div class="mu"><b>${x.phoneNumber}</b> · ${x.reason||''}</div>`).join('')||'<span class="mu">Yok</span>'}
+async function addDnc(){await j('/api/dnc',{method:'POST',body:JSON.stringify({phone:document.getElementById('dncp').value})});loadDnc()}
+async function loadDnc(){const d=await j('/api/dnc');document.getElementById('dncl').textContent=(d.numbers||[]).join(', ')||'Liste boş'}
+async function loadLogs(){const d=await j('/api/logs');document.getElementById('logl').innerHTML=(d.logs||[]).map(l=>`<div class="mu">[${l.level}] ${l.source} — ${l.message}</div>`).join('')}
+async function loadDrive(){const d=await j('/api/drive');document.getElementById('drvtxt').textContent=d.configured?'Drive bağlı. Yeni kayıtlar klasöre yüklenir.':d.message}
+
+refresh(); setInterval(refresh,8000)
+</script>
 </body>
 </html>

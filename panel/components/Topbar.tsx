@@ -7,9 +7,11 @@ import { NAV } from "./Sidebar";
 
 const TITLES: Record<string, string> = {
   "/": "Übersicht",
+  "/campaigns": "Kampagnen",
   "/calls": "Anrufprotokoll",
   "/callbacks": "Geplante Rückrufe",
   "/recordings": "Gesprächsaufnahmen",
+  "/drive": "Google Drive",
   "/logs": "System-Logs",
 };
 
