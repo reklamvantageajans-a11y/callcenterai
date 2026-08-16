@@ -12,6 +12,7 @@ const TITLES: Record<string, string> = {
   "/callbacks": "Geplante Rückrufe",
   "/recordings": "Gesprächsaufnahmen",
   "/drive": "Google Drive",
+  "/voice": "Stimme",
   "/logs": "System-Logs",
 };
 

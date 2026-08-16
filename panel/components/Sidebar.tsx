@@ -21,6 +21,7 @@ export const NAV = [
   { href: "/callbacks", label: "Rückrufe", icon: PhoneForwarded },
   { href: "/recordings", label: "Aufnahmen", icon: Mic },
   { href: "/drive", label: "Drive", icon: HardDrive },
+  { href: "/voice", label: "Stimme", icon: Headset },
   { href: "/logs", label: "Logs", icon: ScrollText },
 ];
 

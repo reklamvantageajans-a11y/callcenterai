@@ -5,7 +5,7 @@ from fastapi import WebSocket, WebSocketDisconnect
 from starlette.websockets import WebSocketState
 from app.services.openai_voice_service import OpenAIVoiceService
 from app.services.audio_convert import TwilioAudioBridge
-from app.services import call_store
+from app.services import call_store, ops_store
 
 
 def load_prompt(lang: str) -> str:
@@ -20,7 +20,11 @@ class TwilioSession:
     def __init__(self, ws: WebSocket, lang: str = "de"):
         self.ws = ws
         self.lang = lang
-        self.ai = OpenAIVoiceService(system_prompt=load_prompt(lang), phone_mode=True)
+        self.ai = OpenAIVoiceService(
+            system_prompt=load_prompt(lang),
+            phone_mode=True,
+            voice=ops_store.get_settings().get("voice"),
+        )
         self.audio = TwilioAudioBridge()
         self.alive = False
         self.task = None

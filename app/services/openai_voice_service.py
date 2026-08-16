@@ -103,16 +103,21 @@ class OpenAIVoiceService:
     async def trigger_greeting(self, lang: str = "de"):
         if not self.is_connected or not self.ws:
             return
+        from app.services import ops_store
+        s = ops_store.get_settings()
+        opening = (s.get("greetingTr") if lang == "tr" else s.get("greetingDe") or "").strip()
         if lang == "tr":
-            line = (
-                "Sadece Türkçe konuş. Almanca veya İngilizce kullanma. "
-                "Şimdi Adım 1 açılışını sıcak ve akıcı söyle; cümleleri bölme."
-            )
+            line = "Sadece Türkçe konuş. Almanca kullanma. "
+            if opening:
+                line += "Şimdi tam olarak şu açılışı doğal söyle, ezbere okuma: " + opening
+            else:
+                line += "Şimdi Adım 1 açılışını sıcak ve akıcı söyle."
         else:
-            line = (
-                "Sprich ausschließlich Deutsch. Kein Türkisch, kein Englisch. "
-                "Beginne jetzt mit Schritt 1 — warm, fließend, nicht abgehackt."
-            )
+            line = "Sprich ausschließlich Deutsch. Kein Türkisch. "
+            if opening:
+                line += "Sprich jetzt genau diese Begrüßung, natürlich, nicht abgelesen: " + opening
+            else:
+                line += "Beginne jetzt mit Schritt 1 — warm und fließend."
         await self.ws.send(json.dumps({
             "type": "response.create",
             "response": {"instructions": line}

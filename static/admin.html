@@ -1,224 +1,253 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="de">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Callcenter Kontrollpanel</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <title>VK Control</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;650;700&display=swap" rel="stylesheet">
   <style>
-    :root{--bg:#f1f5f9;--sf:#fff;--sf2:#f8fafc;--bd:#e2e8f0;--mu:#94a3b8;--su:#64748b;--tx:#0f172a;--side:#1e293b;--act:#334155;--br:#4f46e5;--ok:#16a34a;--no:#dc2626;--wa:#d97706}
+    :root{--bg:#f4f5f7;--sf:#fff;--line:#e8eaed;--mu:#8b919c;--tx:#111318;--side:#111827;--act:#1f2937;--br:#4f46e5;--ok:#15803d;--no:#b91c1c}
     *{box-sizing:border-box;margin:0;padding:0}
     body{font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;display:flex}
-    aside{width:232px;background:var(--side);color:#cbd5e1;display:flex;flex-direction:column;flex-shrink:0}
-    .logo{display:flex;gap:12px;align-items:center;padding:22px 18px}
-    .mark{width:36px;height:36px;border-radius:8px;background:var(--br);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px}
-    nav{flex:1;padding:0 10px}
-    nav button{width:100%;text-align:left;background:0;border:0;color:#94a3b8;padding:10px 12px;border-radius:8px;font:inherit;font-size:13.5px;font-weight:500;cursor:pointer;margin-bottom:2px}
-    nav button.on,nav button:hover{background:var(--act);color:#f8fafc}
-    .foot{margin:12px;padding:12px;border-radius:8px;background:#263347;font-size:12px}
-    .dot{width:7px;height:7px;border-radius:50%;background:#4ade80;display:inline-block;margin-right:6px}
+    aside{width:220px;background:var(--side);color:#9ca3af;display:flex;flex-direction:column;flex-shrink:0}
+    .brand{padding:22px 18px 18px;color:#fff;font-weight:650;letter-spacing:-.02em;font-size:15px}
+    .brand small{display:block;color:#6b7280;font-weight:500;font-size:11px;margin-top:3px}
+    nav{flex:1;padding:6px 10px}
+    nav button{width:100%;text-align:left;background:0;border:0;color:#9ca3af;padding:9px 12px;border-radius:8px;font:inherit;font-size:13px;font-weight:500;cursor:pointer;margin-bottom:1px}
+    nav button.on,nav button:hover{background:var(--act);color:#fff}
     main{flex:1;min-width:0;display:flex;flex-direction:column}
-    header{background:#fff;border-bottom:1px solid var(--bd);padding:14px 22px;display:flex;justify-content:space-between;align-items:center;gap:12px}
-    header h1{font-size:16px} header p{font-size:12px;color:var(--mu);margin-top:2px}
-    .secret{border:1px solid var(--bd);border-radius:8px;padding:8px 10px;font:inherit;font-size:12px;width:150px;background:var(--sf2)}
-    .content{padding:20px 22px;overflow:auto}
-    .g4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
-    .stat{background:#fff;border:1px solid var(--bd);border-radius:12px;padding:14px}
-    .stat .k{font-size:11px;color:var(--su);font-weight:600;text-transform:uppercase;letter-spacing:.03em}
-    .stat .v{font-size:22px;font-weight:700;margin-top:6px}
-    .card{background:#fff;border:1px solid var(--bd);border-radius:12px;padding:16px;margin-bottom:14px}
-    label{display:block;font-size:12px;font-weight:600;color:var(--su);margin:10px 0 6px}
-    input,select,textarea{width:100%;border:1px solid var(--bd);border-radius:8px;padding:10px 12px;font:inherit;font-size:14px;background:#fff}
-    textarea{min-height:140px;font-family:ui-monospace,monospace;font-size:13px}
-    .btn{border:0;border-radius:8px;padding:10px 14px;font:inherit;font-weight:600;cursor:pointer}
-    .btn-g{background:var(--ok);color:#fff}.btn-b{background:var(--br);color:#fff}.btn-w{background:#fff;border:1px solid var(--bd)}
+    header{background:#fff;border-bottom:1px solid var(--line);padding:14px 24px;display:flex;justify-content:space-between;align-items:center}
+    header h1{font-size:15px;font-weight:650}
+    .pin{border:1px solid var(--line);border-radius:8px;padding:7px 10px;font:inherit;font-size:12px;width:140px;background:#fafafa}
+    .wrap{padding:22px 24px;overflow:auto}
+    .g4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+    .stat{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+    .stat em{display:block;font-style:normal;font-size:11px;color:var(--mu);font-weight:600;letter-spacing:.04em;text-transform:uppercase}
+    .stat b{display:block;font-size:22px;margin-top:6px;letter-spacing:-.03em}
+    .card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px;margin-bottom:14px}
+    h3{font-size:14px;font-weight:650;margin-bottom:12px}
+    label{display:block;font-size:12px;font-weight:600;color:#4b5563;margin:12px 0 6px}
+    input,select,textarea{width:100%;border:1px solid var(--line);border-radius:8px;padding:10px 12px;font:inherit;font-size:13.5px}
+    textarea{min-height:88px;line-height:1.45}
+    .btn{border:0;border-radius:8px;padding:9px 14px;font:inherit;font-size:13px;font-weight:600;cursor:pointer}
+    .pri{background:#111827;color:#fff}.ok{background:var(--ok);color:#fff}.ghost{background:#fff;border:1px solid var(--line)}
     table{width:100%;border-collapse:collapse;font-size:13px}
-    th{text-align:left;font-size:11px;text-transform:uppercase;color:var(--mu);padding:8px 10px;border-bottom:1px solid var(--bd);background:var(--sf2)}
-    td{padding:10px;border-bottom:1px solid #f1f5f9;vertical-align:top}
-    tr.click:hover td{background:var(--sf2);cursor:pointer}
-    .badge{font-size:11px;font-weight:600;padding:3px 8px;border-radius:99px;background:#eef2ff;color:var(--br)}
-    .ok{color:var(--ok)}.err{color:var(--no)}.mu{color:var(--su);font-size:13px}
-    .turn{margin:8px 0;padding:10px 12px;border-radius:10px;font-size:13.5px;line-height:1.5}
-    .agent{background:#f1f5f9}.user{background:#dcfce7}
-    .who{font-size:11px;font-weight:700;color:var(--su);margin-bottom:4px}
-    .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-    .chip{font-size:11px;padding:4px 8px;border-radius:6px;background:var(--sf2);border:1px solid var(--bd);cursor:pointer}
-    .bar{height:8px;background:#e2e8f0;border-radius:99px;overflow:hidden;margin-top:8px}
+    th{text-align:left;font-size:11px;color:var(--mu);font-weight:600;padding:8px 10px;border-bottom:1px solid var(--line)}
+    td{padding:10px;border-bottom:1px solid #f3f4f6}
+    tr.click:hover td{background:#fafafa;cursor:pointer}
+    .voices{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
+    .vc{border:1px solid var(--line);border-radius:10px;padding:12px;cursor:pointer;background:#fff}
+    .vc.on{border-color:var(--br);box-shadow:0 0 0 3px #eef2ff}
+    .vc .g{font-size:11px;color:var(--mu);margin-top:2px}
+    .turn{margin:8px 0;padding:10px 12px;border-radius:10px;font-size:13px;line-height:1.5}
+    .agent{background:#f3f4f6}.user{background:#ecfdf3}
+    .who{font-size:10px;font-weight:700;color:var(--mu);letter-spacing:.04em;text-transform:uppercase;margin-bottom:4px}
+    .bar{height:6px;background:#eee;border-radius:99px;overflow:hidden;margin:8px 0}
     .bar>i{display:block;height:100%;background:var(--br)}
-    @media(max-width:900px){body{flex-direction:column}aside{width:100%;min-height:auto;flex-direction:row;overflow:auto}nav{display:flex}.logo,.foot{display:none}.g4{grid-template-columns:1fr 1fr}}
+    .msg{font-size:13px;margin-top:10px;color:var(--mu)}
+    .err{color:var(--no)}.good{color:var(--ok)}
+    .split{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    @media(max-width:900px){body{flex-direction:column}aside{width:100%;flex-direction:row;overflow:auto;min-height:auto}nav{display:flex}.brand{display:none}.g4,.split,.voices{grid-template-columns:1fr 1fr}}
   </style>
 </head>
 <body>
 <aside>
-  <div class="logo"><div class="mark">VK</div><div><b style="color:#fff;display:block;font-size:14px">Callcenter</b><span style="font-size:11px;color:#64748b">Kontrollpanel</span></div></div>
+  <div class="brand">VK Control<small>Voice operations</small></div>
   <nav>
-    <button class="on" data-t="dash" onclick="tab('dash')">Dashboard</button>
-    <button data-t="dial" onclick="tab('dial')">Tekli ara</button>
-    <button data-t="camp" onclick="tab('camp')">Toplu arama</button>
-    <button data-t="calls" onclick="tab('calls')">Anrufe</button>
+    <button class="on" data-t="dash" onclick="tab('dash')">Übersicht</button>
+    <button data-t="dial" onclick="tab('dial')">Anruf</button>
+    <button data-t="camp" onclick="tab('camp')">Kampagne</button>
+    <button data-t="calls" onclick="tab('calls')">Gespräche</button>
     <button data-t="recs" onclick="tab('recs')">Aufnahmen</button>
+    <button data-t="voice" onclick="tab('voice')">Stimme</button>
+    <button data-t="open" onclick="tab('open')">Begrüßung</button>
     <button data-t="cb" onclick="tab('cb')">Rückrufe</button>
-    <button data-t="dnc" onclick="tab('dnc')">DNC / Sperre</button>
-    <button data-t="drive" onclick="tab('drive')">Google Drive</button>
-    <button data-t="logs" onclick="tab('logs')">Logs</button>
+    <button data-t="dnc" onclick="tab('dnc')">Sperrliste</button>
+    <button data-t="drive" onclick="tab('drive')">Drive</button>
+    <button data-t="logs" onclick="tab('logs')">Ereignisse</button>
   </nav>
-  <div class="foot"><span class="dot"></span>System online<br>Agent: <b style="color:#e2e8f0">Kalmaz</b></div>
 </aside>
 <main>
   <header>
-    <div><h1 id="title">Übersicht</h1><p>Twilio + Kalmaz · kayıt, transkript, kampanya</p></div>
-    <input class="secret" id="secret" type="password" placeholder="CALL_SECRET">
+    <h1 id="title">Übersicht</h1>
+    <input class="pin" id="secret" type="password" placeholder="Zugang" autocomplete="current-password">
   </header>
-  <div class="content">
+  <div class="wrap">
     <section id="dash">
       <div class="g4">
-        <div class="stat"><div class="k">Anrufe</div><div class="v" id="s-total">0</div></div>
-        <div class="stat"><div class="k">Aktiv</div><div class="v" id="s-act">0</div></div>
-        <div class="stat"><div class="k">Kampagnen</div><div class="v" id="s-cmp">0</div></div>
-        <div class="stat"><div class="k">Drive</div><div class="v" id="s-drv" style="font-size:14px;padding-top:8px">—</div></div>
+        <div class="stat"><em>Gespräche</em><b id="s-total">0</b></div>
+        <div class="stat"><em>Aktiv</em><b id="s-act">0</b></div>
+        <div class="stat"><em>Kampagnen</em><b id="s-cmp">0</b></div>
+        <div class="stat"><em>Drive</em><b id="s-drv" style="font-size:15px;padding-top:8px">—</b></div>
       </div>
-      <div class="card mu">Sağ üstte CALL_SECRET. Toplu arama aynı numaradan sırayla/az eşzamanlı çalar. Render’da eşzamanlı varsayılan 2.</div>
     </section>
 
     <section id="dial" class="card" hidden>
-      <h3>Tek numara</h3>
-      <label>Nummer</label><input id="to" placeholder="+49... / +90...">
-      <label>Sprache</label><select id="lang"><option value="de">Deutsch</option><option value="tr">Türkçe</option></select>
-      <button class="btn btn-g" style="margin-top:12px" id="btn" onclick="placeCall()">Anrufen</button>
-      <div id="msg" class="mu" style="margin-top:10px"></div>
+      <h3>Ausgehend</h3>
+      <label>Nummer</label><input id="to" placeholder="+49 …">
+      <label>Sprache</label><select id="lang"><option value="de">Deutsch</option><option value="tr">Türkisch</option></select>
+      <button class="btn ok" style="margin-top:14px" id="btn" onclick="placeCall()">Anrufen</button>
+      <div class="msg" id="msg"></div>
     </section>
 
     <section id="camp" hidden>
       <div class="card">
-        <h3>Toplu arama</h3>
-        <p class="mu">Her satıra bir numara. Tek Twilio hattı hepsini çaldırır; aynı anda en fazla 2 (Render).</p>
-        <label>Kampanya adı</label><input id="cname" value="Kampagne 1">
-        <label>Numaralar</label><textarea id="cnums" placeholder="+4917...&#10;+905..."></textarea>
-        <label>Dil</label><select id="clang"><option value="de">Deutsch</option><option value="tr">Türkçe</option></select>
-        <label>Aynı anda</label><select id="cpar"><option>1</option><option selected>2</option></select>
-        <button class="btn btn-b" style="margin-top:12px" onclick="startCamp()">Kampanyayı başlat</button>
-        <div id="cmsg" class="mu" style="margin-top:8px"></div>
+        <h3>Kampagne</h3>
+        <label>Name</label><input id="cname" value="Kampagne">
+        <label>Nummern</label><textarea id="cnums" placeholder="+49…"></textarea>
+        <div class="split">
+          <div><label>Sprache</label><select id="clang"><option value="de">Deutsch</option><option value="tr">Türkisch</option></select></div>
+          <div><label>Parallel</label><select id="cpar"><option>1</option><option selected>2</option></select></div>
+        </div>
+        <button class="btn pri" style="margin-top:14px" onclick="startCamp()">Start</button>
+        <div class="msg" id="cmsg"></div>
       </div>
       <div class="card" id="clist"></div>
     </section>
 
     <section id="calls" class="card" hidden>
-      <input id="q" placeholder="Suche Nummer…" oninput="loadCalls()" style="margin-bottom:12px">
-      <table><thead><tr><th>Nummer</th><th>Richtung</th><th>Lang</th><th>Ergebnis</th><th>Vorschau</th></tr></thead><tbody id="tbody"></tbody></table>
-      <div id="detail" style="margin-top:14px"></div>
+      <input id="q" placeholder="Suche" oninput="loadCalls()" style="margin-bottom:12px">
+      <table><thead><tr><th>Nummer</th><th>Richtung</th><th>Sprache</th><th>Status</th></tr></thead><tbody id="tbody"></tbody></table>
+      <div id="detail" style="margin-top:16px"></div>
     </section>
 
     <section id="recs" hidden><div id="reclist"></div></section>
 
+    <section id="voice" hidden>
+      <div class="card">
+        <h3>Realtime-Stimme</h3>
+        <div class="voices" id="vgrid"></div>
+        <audio id="vprev" style="margin-top:14px;width:100%" controls></audio>
+        <div class="msg" id="vmsg"></div>
+      </div>
+    </section>
+
+    <section id="open" class="card" hidden>
+      <h3>Begrüßung</h3>
+      <label>Name</label><input id="aname">
+      <label>Deutsch — erster Satz</label><textarea id="gde"></textarea>
+      <label>Türkisch — erster Satz</label><textarea id="gtr"></textarea>
+      <button class="btn pri" style="margin-top:14px" onclick="saveOpen()">Speichern</button>
+      <div class="msg" id="omsg"></div>
+    </section>
+
     <section id="cb" hidden>
       <div class="card">
-        <h3>Rückruf anlegen</h3>
-        <label>Nummer</label><input id="cbp" placeholder="+49...">
-        <label>Grund</label><input id="cbr" placeholder="Kunde bat um 16:00">
-        <button class="btn btn-w" style="margin-top:10px" onclick="addCb()">Speichern</button>
+        <h3>Rückruf</h3>
+        <label>Nummer</label><input id="cbp">
+        <label>Notiz</label><input id="cbr">
+        <button class="btn ghost" style="margin-top:12px" onclick="addCb()">Anlegen</button>
       </div>
       <div class="card" id="cblist"></div>
     </section>
 
-    <section id="dnc" hidden>
-      <div class="card">
-        <h3>Nicht anrufen (DNC)</h3>
-        <p class="mu">Bu listedekiler toplu ve tekli aramada atlanır.</p>
-        <label>Nummer</label><input id="dncp" placeholder="+49...">
-        <button class="btn btn-w" style="margin-top:10px" onclick="addDnc()">Sperre</button>
-        <div id="dncl" class="mu" style="margin-top:12px"></div>
-      </div>
+    <section id="dnc" class="card" hidden>
+      <h3>Sperrliste</h3>
+      <label>Nummer</label><input id="dncp">
+      <button class="btn ghost" style="margin-top:12px" onclick="addDnc()">Hinzufügen</button>
+      <div class="msg" id="dncl"></div>
     </section>
 
     <section id="drive" class="card" hidden>
       <h3>Google Drive</h3>
-      <p class="mu" id="drvtxt">Durum yükleniyor…</p>
-      <p class="mu" style="margin-top:10px">Render Environment:<br>
-        <code>GOOGLE_DRIVE_FOLDER_ID</code><br>
-        <code>GOOGLE_SERVICE_ACCOUNT_JSON</code> (servis hesabı JSON)</p>
-      <p class="mu">Klasöre servis hesabı e-postasını <b>Editor</b> olarak ekleyin. Kayıt bitince mp3 Drive’a gider.</p>
+      <p class="msg" id="drvtxt"></p>
     </section>
 
     <section id="logs" class="card" hidden><div id="logl"></div></section>
   </div>
 </main>
 <script>
-const T={dash:'Übersicht',dial:'Tekli ara',camp:'Toplu arama',calls:'Anrufe',recs:'Aufnahmen',cb:'Rückrufe',dnc:'DNC',drive:'Google Drive',logs:'Logs'}
+const T={dash:'Übersicht',dial:'Anruf',camp:'Kampagne',calls:'Gespräche',recs:'Aufnahmen',voice:'Stimme',open:'Begrüßung',cb:'Rückrufe',dnc:'Sperrliste',drive:'Drive',logs:'Ereignisse'}
 const secretEl=document.getElementById('secret')
 secretEl.value=localStorage.getItem('call_secret')||''
 secretEl.onchange=()=>localStorage.setItem('call_secret',secretEl.value.trim())
 const secret=()=>secretEl.value.trim()
 const H=()=>({'Content-Type':'application/json','x-call-secret':secret()})
 function tab(id){document.querySelectorAll('section').forEach(s=>s.hidden=s.id!==id);document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===id));document.getElementById('title').textContent=T[id];refresh()}
-async function j(url,opt){const r=await fetch(url,Object.assign({headers:H()},opt||{})); if(r.status===401) throw new Error('şifre'); return r.json()}
+async function j(u,o){const r=await fetch(u,Object.assign({headers:H()},o||{}));if(r.status===401)throw new Error('Zugang');const ct=r.headers.get('content-type')||'';if(ct.includes('json'))return r.json();return r}
 
 async function placeCall(){
-  const btn=document.getElementById('btn'), msg=document.getElementById('msg')
-  let to=document.getElementById('to').value.replace(/[\s()-]/g,'')
-  const lang=document.getElementById('lang').value
-  if(!secret()||!to){msg.textContent='Şifre ve numara';msg.className='err';return}
+  const msg=document.getElementById('msg'); let to=document.getElementById('to').value.replace(/[\s()-]/g,'')
+  if(!secret()||!to){msg.className='msg err';msg.textContent='Angaben unvollständig.';return}
   if(!to.startsWith('+')) to='+'+to.replace(/^00/,'')
   localStorage.setItem('call_secret',secret())
-  btn.disabled=true
-  try{const d=await j('/twilio/call',{method:'POST',body:JSON.stringify({to,lang})});msg.className='ok';msg.textContent='Arama başladı · '+(d.sid||'')}
-  catch(e){msg.className='err';msg.textContent=e.message}
-  btn.disabled=false
+  try{const d=await j('/twilio/call',{method:'POST',body:JSON.stringify({to,lang:document.getElementById('lang').value})});msg.className='msg good';msg.textContent=d.sid||'Gestartet'}
+  catch(e){msg.className='msg err';msg.textContent=e.message}
 }
-
 async function startCamp(){
   const msg=document.getElementById('cmsg')
-  try{
-    const d=await j('/api/campaigns',{method:'POST',body:JSON.stringify({name:document.getElementById('cname').value,lang:document.getElementById('clang').value,concurrency:document.getElementById('cpar').value,text:document.getElementById('cnums').value})})
-    msg.className='ok';msg.textContent=d.total+' numara kuyrukta'
-    loadCamps()
-  }catch(e){msg.className='err';msg.textContent=e.message}
+  try{const d=await j('/api/campaigns',{method:'POST',body:JSON.stringify({name:document.getElementById('cname').value,lang:document.getElementById('clang').value,concurrency:document.getElementById('cpar').value,text:document.getElementById('cnums').value})});msg.className='msg good';msg.textContent=d.total+' in Warteschlange';loadCamps()}
+  catch(e){msg.className='msg err';msg.textContent=e.message}
 }
 
-let cache=[]
-async function refresh(){if(!secret())return; try{await Promise.all([loadCalls(),loadCamps(),loadCbs(),loadDnc(),loadLogs(),loadDrive(),loadStats()])}catch(e){}}
+async function refresh(){if(!secret())return;try{await Promise.all([loadCalls(),loadCamps(),loadCbs(),loadDnc(),loadLogs(),loadDrive(),loadStats(),loadVoice(),loadOpen()])}catch(e){}}
 
 async function loadStats(){
-  const s=await j('/api/stats')
+  const s=await j('/api/stats'); const c=await j('/api/campaigns')
   document.getElementById('s-total').textContent=s.totalToday||0
   document.getElementById('s-act').textContent=(s.dialer&&s.dialer.active)||0
-  document.getElementById('s-cmp').textContent=(await j('/api/campaigns')).campaigns.length
-  document.getElementById('s-drv').textContent=(s.drive&&s.drive.configured)?'Bağlı':'Kapalı'
+  document.getElementById('s-cmp').textContent=(c.campaigns||[]).length
+  document.getElementById('s-drv').textContent=(s.drive&&s.drive.configured)?'Aktiv':'—'
 }
 
 async function loadCalls(){
-  const q=document.getElementById('q')?document.getElementById('q').value:''
-  const d=await j('/api/calls?q='+encodeURIComponent(q||''))
-  cache=d.calls||[]
-  document.getElementById('tbody').innerHTML=cache.map(c=>`<tr class="click" onclick="show('${c.id}')"><td style="font-family:ui-monospace;font-weight:600">${c.phoneNumber||''}</td><td><span class="badge">${c.direction||''}</span></td><td>${(c.lang||'').toUpperCase()}</td><td>${c.outcome||c.status||''}</td><td class="mu">${(c.transcriptPreview||'—').slice(0,70)}</td></tr>`).join('')||'<tr><td colspan="5" class="mu">Kayıt yok</td></tr>'
-  document.getElementById('reclist').innerHTML=cache.filter(c=>c.twilioRecordingUrl||c.driveUrl).map(c=>`<div class="card"><b>${c.phoneNumber}</b> ${c.driveUrl?' · Drive':''}<br><audio controls preload="none" src="/api/calls/${c.id}/recording?secret=${encodeURIComponent(secret())}"></audio>${c.driveUrl?`<div class="mu"><a href="${c.driveUrl}" target="_blank">Drive’da aç</a></div>`:''}</div>`).join('')||'<div class="card mu">Henüz kayıt yok</div>'
+  const q=document.getElementById('q')?.value||''
+  const d=await j('/api/calls?q='+encodeURIComponent(q))
+  window._calls=d.calls||[]
+  document.getElementById('tbody').innerHTML=(d.calls||[]).map(c=>`<tr class="click" onclick="show('${c.id}')"><td style="font-variant-numeric:tabular-nums;font-weight:600">${c.phoneNumber||''}</td><td>${c.direction||''}</td><td>${(c.lang||'').toUpperCase()}</td><td>${c.outcome||c.status||''}</td></tr>`).join('')||'<tr><td colspan="4" class="msg">Keine Einträge</td></tr>'
+  document.getElementById('reclist').innerHTML=(d.calls||[]).filter(c=>c.twilioRecordingUrl||c.driveUrl).map(c=>`<div class="card"><div style="font-weight:600;margin-bottom:8px">${c.phoneNumber}</div><audio controls preload="none" src="/api/calls/${c.id}/recording?secret=${encodeURIComponent(secret())}"></audio>${c.driveUrl?`<div class="msg"><a href="${c.driveUrl}" target="_blank">Drive</a></div>`:''}</div>`).join('')||'<div class="card msg">Keine Aufnahmen</div>'
 }
-
 async function show(id){
   const c=await j('/api/calls/'+id)
-  const turns=(c.transcript||[]).map(t=>`<div class="turn ${t.role}"><div class="who">${t.role==='agent'?'Kalmaz':'Kunde'}</div>${(t.text||'').replace(/</g,'')}</div>`).join('')||'<p class="mu">Transkript yok</p>'
+  const turns=(c.transcript||[]).map(t=>`<div class="turn ${t.role}"><div class="who">${t.role==='agent'?'Agent':'Kunde'}</div>${(t.text||'').replace(/</g,'')}</div>`).join('')||'<p class="msg">Noch kein Transkript</p>'
   const rec=c.twilioRecordingUrl?`<audio controls src="/api/calls/${c.id}/recording?secret=${encodeURIComponent(secret())}"></audio>`:''
-  const chips=['converted','callback','not_interested','no_answer'].map(o=>`<span class="chip" onclick="out('${id}','${o}')">${o}</span>`).join('')
-  document.getElementById('detail').innerHTML=`<h3>${c.phoneNumber}</h3><div class="row">${chips}</div>${turns}${rec}`
+  document.getElementById('detail').innerHTML=`<h3>${c.phoneNumber}</h3>${turns}${rec}`
 }
-async function out(id,o){await j('/api/calls/'+id+'/outcome',{method:'POST',body:JSON.stringify({outcome:o})});loadCalls()}
-
 async function loadCamps(){
   const d=await j('/api/campaigns')
   document.getElementById('clist').innerHTML=(d.campaigns||[]).map(c=>{
     const pct=c.total?Math.round(100*(c.done||0)/c.total):0
-    return `<div style="margin-bottom:14px"><b>${c.name}</b> · ${c.status} · ${c.lang} · ${c.done||0}/${c.total}<div class="bar"><i style="width:${pct}%"></i></div>
-      ${(c.numbers||[]).slice(0,40).map(n=>`<div class="mu">${n.phone} — ${n.status}${n.error?': '+n.error:''}</div>`).join('')}</div>`
-  }).join('')||'<span class="mu">Kampanya yok</span>'
+    return `<div style="margin-bottom:16px"><div style="display:flex;justify-content:space-between"><b>${c.name}</b><span class="msg">${c.status} · ${c.done||0}/${c.total}</span></div><div class="bar"><i style="width:${pct}%"></i></div>${(c.numbers||[]).slice(0,30).map(n=>`<div class="msg">${n.phone} · ${n.status}</div>`).join('')}</div>`
+  }).join('')||'<span class="msg">Keine Kampagne</span>'
 }
-
+async function loadVoice(){
+  const d=await j('/api/voices')
+  const sel=d.selected
+  document.getElementById('vgrid').innerHTML=(d.voices||[]).map(v=>`
+    <div class="vc ${v.id===sel?'on':''}" onclick="pickVoice('${v.id}')">
+      <div style="font-weight:650">${v.label}</div>
+      <div class="g">${v.gender==='female'?'Weiblich':v.gender==='male'?'Männlich':'Neutral'}</div>
+      <button class="btn ghost" style="margin-top:8px;width:100%" onclick="event.stopPropagation();preview('${v.id}')">Anhören</button>
+    </div>`).join('')
+}
+async function pickVoice(id){
+  await j('/api/settings',{method:'POST',body:JSON.stringify({voice:id})})
+  loadVoice()
+}
+async function preview(id){
+  const msg=document.getElementById('vmsg'); msg.textContent='…'
+  const r=await fetch('/api/voices/preview',{method:'POST',headers:H(),body:JSON.stringify({voice:id,lang:document.getElementById('lang')?.value||'de'})})
+  if(!r.ok){msg.className='msg err';msg.textContent='Vorschau nicht verfügbar';return}
+  const b=await r.blob(); const a=document.getElementById('vprev'); a.src=URL.createObjectURL(b); a.play(); msg.textContent=''
+}
+async function loadOpen(){
+  const s=await j('/api/settings')
+  document.getElementById('aname').value=s.agentName||''
+  document.getElementById('gde').value=s.greetingDe||''
+  document.getElementById('gtr').value=s.greetingTr||''
+}
+async function saveOpen(){
+  await j('/api/settings',{method:'POST',body:JSON.stringify({agentName:document.getElementById('aname').value,greetingDe:document.getElementById('gde').value,greetingTr:document.getElementById('gtr').value})})
+  document.getElementById('omsg').className='msg good'; document.getElementById('omsg').textContent='Gespeichert'
+}
 async function addCb(){await j('/api/callbacks',{method:'POST',body:JSON.stringify({phone:document.getElementById('cbp').value,reason:document.getElementById('cbr').value})});loadCbs()}
-async function loadCbs(){const d=await j('/api/callbacks');document.getElementById('cblist').innerHTML=(d.callbacks||[]).map(x=>`<div class="mu"><b>${x.phoneNumber}</b> · ${x.reason||''}</div>`).join('')||'<span class="mu">Yok</span>'}
+async function loadCbs(){const d=await j('/api/callbacks');document.getElementById('cblist').innerHTML=(d.callbacks||[]).map(x=>`<div class="msg"><b>${x.phoneNumber}</b> ${x.reason||''}</div>`).join('')||'<span class="msg">—</span>'}
 async function addDnc(){await j('/api/dnc',{method:'POST',body:JSON.stringify({phone:document.getElementById('dncp').value})});loadDnc()}
-async function loadDnc(){const d=await j('/api/dnc');document.getElementById('dncl').textContent=(d.numbers||[]).join(', ')||'Liste boş'}
-async function loadLogs(){const d=await j('/api/logs');document.getElementById('logl').innerHTML=(d.logs||[]).map(l=>`<div class="mu">[${l.level}] ${l.source} — ${l.message}</div>`).join('')}
-async function loadDrive(){const d=await j('/api/drive');document.getElementById('drvtxt').textContent=d.configured?'Drive bağlı. Yeni kayıtlar klasöre yüklenir.':d.message}
+async function loadDnc(){const d=await j('/api/dnc');document.getElementById('dncl').textContent=(d.numbers||[]).join('  ·  ')||'—'}
+async function loadLogs(){const d=await j('/api/logs');document.getElementById('logl').innerHTML=(d.logs||[]).map(l=>`<div class="msg">${l.source} — ${l.message}</div>`).join('')}
+async function loadDrive(){const d=await j('/api/drive');document.getElementById('drvtxt').textContent=d.configured?'Verbunden':'Nicht verbunden'}
 
-refresh(); setInterval(refresh,8000)
+refresh(); setInterval(refresh,10000)
 </script>
 </body>
 </html>

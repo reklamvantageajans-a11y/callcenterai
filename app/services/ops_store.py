@@ -132,3 +132,40 @@ def add_dnc(phone):
             items.append(phone)
             save_list("dnc.json", items)
         return items
+
+
+_DEFAULT_SETTINGS = {
+    "voice": os.getenv("OPENAI_VOICE", "marin"),
+    "lang": "de",
+    "agentName": "Kalmaz",
+    "greetingDe": "Einen wunderschönen guten Tag, mein Name ist Kalmaz vom Verbund der Privat Krankenversicherten. Ich fass mich kurz: gesetzliche und private Kassen erhöhen demnächst wieder die Beiträge. Unser Experte erstellt Ihnen kostenlos und unverbindlich eine Vergleichsanalyse. Wäre das was für Sie?",
+    "greetingTr": "İyi günler, ben Kalmaz, Özel Sağlık Sigortacıları Birliği'nden arıyorum. Kısa keseceğim: SGK ve özel sağlık sigortaları yakında prim artışı yapacak. Uzmanımız ücretsiz ve bağlayıcı olmayan bir karşılaştırma hazırlayabilir. Uygun olur mu?",
+    "maxConcurrent": 2,
+}
+
+
+def get_settings():
+    p = _path("settings.json")
+    data = dict(_DEFAULT_SETTINGS)
+    if os.path.exists(p):
+        try:
+            with open(p, "r", encoding="utf-8") as f:
+                data.update(json.load(f) or {})
+        except Exception:
+            pass
+    return data
+
+
+def save_settings(fields: dict):
+    data = get_settings()
+    allowed = set(_DEFAULT_SETTINGS.keys())
+    for k, v in (fields or {}).items():
+        if k in allowed and v is not None:
+            data[k] = v
+    os.makedirs(_DIR, exist_ok=True)
+    p = _path("settings.json")
+    tmp = p + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+    os.replace(tmp, p)
+    return data

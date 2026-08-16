@@ -372,6 +372,73 @@ async def api_drive(request: Request):
     return drive_service.status()
 
 
+VOICES = [
+    {"id": "marin", "gender": "female", "label": "Marin"},
+    {"id": "coral", "gender": "female", "label": "Coral"},
+    {"id": "sage", "gender": "female", "label": "Sage"},
+    {"id": "verse", "gender": "female", "label": "Verse"},
+    {"id": "shimmer", "gender": "female", "label": "Shimmer"},
+    {"id": "ballad", "gender": "female", "label": "Ballad"},
+    {"id": "alloy", "gender": "neutral", "label": "Alloy"},
+    {"id": "ash", "gender": "male", "label": "Ash"},
+    {"id": "echo", "gender": "male", "label": "Echo"},
+    {"id": "cedar", "gender": "male", "label": "Cedar"},
+]
+
+
+@app.get("/api/voices")
+async def api_voices(request: Request):
+    if not _require_secret(request):
+        return JSONResponse({"error": "unauthorized"}, status_code=401)
+    return {"voices": VOICES, "selected": ops_store.get_settings().get("voice")}
+
+
+@app.post("/api/voices/preview")
+async def api_voice_preview(request: Request):
+    if not _require_secret(request):
+        return JSONResponse({"error": "unauthorized"}, status_code=401)
+    body = await request.json()
+    voice = body.get("voice") or "marin"
+    lang = body.get("lang") or "de"
+    text = (
+        "Guten Tag, mein Name ist Kalmaz. Wie kann ich Ihnen helfen?"
+        if lang != "tr"
+        else "Merhaba, ben Kalmaz. Size nasıl yardımcı olabilirim?"
+    )
+    import httpx
+    key = os.getenv("OPENAI_API_KEY", "")
+    async with httpx.AsyncClient(timeout=45) as client:
+        r = await client.post(
+            "https://api.openai.com/v1/audio/speech",
+            headers={"Authorization": f"Bearer {key}"},
+            json={"model": "gpt-4o-mini-tts", "voice": voice, "input": text, "format": "mp3"},
+        )
+        if r.status_code >= 400:
+            r = await client.post(
+                "https://api.openai.com/v1/audio/speech",
+                headers={"Authorization": f"Bearer {key}"},
+                json={"model": "tts-1-hd", "voice": "alloy" if voice not in ("alloy", "echo", "fable", "onyx", "nova", "shimmer") else voice, "input": text},
+            )
+    if r.status_code >= 400:
+        return JSONResponse({"error": "preview failed"}, status_code=502)
+    return Response(content=r.content, media_type="audio/mpeg")
+
+
+@app.get("/api/settings")
+async def api_settings_get(request: Request):
+    if not _require_secret(request):
+        return JSONResponse({"error": "unauthorized"}, status_code=401)
+    return ops_store.get_settings()
+
+
+@app.post("/api/settings")
+async def api_settings_post(request: Request):
+    if not _require_secret(request):
+        return JSONResponse({"error": "unauthorized"}, status_code=401)
+    body = await request.json()
+    return ops_store.save_settings(body)
+
+
 @app.post("/api/calls/{call_id}/outcome")
 async def api_outcome(call_id: str, request: Request):
     if not _require_secret(request):
@@ -384,7 +451,10 @@ class Session:
     def __init__(self, ws: WebSocket, lang: str = "de"):
         self.ws = ws
         self.lang = lang
-        self.ai = OpenAIVoiceService(system_prompt=load_prompt(lang))
+        self.ai = OpenAIVoiceService(
+            system_prompt=load_prompt(lang),
+            voice=ops_store.get_settings().get("voice"),
+        )
         self.alive = False
         self.task = None
         self.last_item_id = None
