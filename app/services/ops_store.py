@@ -141,6 +141,9 @@ _DEFAULT_SETTINGS = {
     "greetingDe": "Einen wunderschönen guten Tag, mein Name ist Kalmaz vom Verbund der Privat Krankenversicherten. Ich fass mich kurz: gesetzliche und private Kassen erhöhen demnächst wieder die Beiträge. Unser Experte erstellt Ihnen kostenlos und unverbindlich eine Vergleichsanalyse. Wäre das was für Sie?",
     "greetingTr": "İyi günler, ben Kalmaz, Özel Sağlık Sigortacıları Birliği'nden arıyorum. Kısa keseceğim: SGK ve özel sağlık sigortaları yakında prim artışı yapacak. Uzmanımız ücretsiz ve bağlayıcı olmayan bir karşılaştırma hazırlayabilir. Uygun olur mu?",
     "maxConcurrent": 2,
+    "panelLang": "tr",
+    "timezone": "Europe/Istanbul",
+    "clockFormat": "24h",
 }
 
 
@@ -169,3 +172,52 @@ def save_settings(fields: dict):
         json.dump(data, f, ensure_ascii=False, indent=2)
     os.replace(tmp, p)
     return data
+
+
+def list_contacts():
+    with _LOCK:
+        return load_list("contacts.json")
+
+
+def add_contacts(entries, lang="de"):
+    with _LOCK:
+        items = load_list("contacts.json")
+        have = {c.get("phone") for c in items}
+        added = 0
+        skipped = 0
+        lang = lang if lang in ("tr", "de") else "de"
+        for entry in entries or []:
+            if isinstance(entry, str):
+                phone, name = entry, ""
+            else:
+                phone = (entry or {}).get("phone") or ""
+                name = (entry or {}).get("name") or ""
+            if not phone:
+                continue
+            if phone in have:
+                skipped += 1
+                continue
+            items.insert(0, {
+                "id": "ct_" + uuid.uuid4().hex[:8],
+                "phone": phone,
+                "name": name or phone,
+                "lang": lang,
+                "createdAt": now_iso(),
+            })
+            have.add(phone)
+            added += 1
+        save_list("contacts.json", items)
+        return {"added": added, "skipped": skipped, "total": len(items), "contacts": items}
+
+
+def delete_contact(cid):
+    with _LOCK:
+        items = [c for c in load_list("contacts.json") if c.get("id") != cid]
+        save_list("contacts.json", items)
+        return items
+
+
+def clear_contacts():
+    with _LOCK:
+        save_list("contacts.json", [])
+        return []

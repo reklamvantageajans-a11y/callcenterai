@@ -3,30 +3,36 @@
 import { useEffect, useState } from "react";
 import { LevelBadge } from "@/components/Badges";
 import { fmtDateTime } from "@/lib/format";
+import { authHeaders, BACKEND } from "@/lib/backend";
+import { useI18n, type I18nKey } from "@/lib/i18n";
 import type { LogEntry, LogLevel } from "@/lib/types";
 
-const LEVELS: { key: LogLevel | ""; label: string }[] = [
-  { key: "", label: "Alle" },
-  { key: "info", label: "Info" },
-  { key: "success", label: "Erfolg" },
-  { key: "warn", label: "Warnung" },
-  { key: "error", label: "Fehler" },
-];
-
 export default function LogsPage() {
+  const { t, tick } = useI18n();
+  void tick;
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [level, setLevel] = useState<LogLevel | "">("");
+
+  const levels: { key: LogLevel | ""; label: I18nKey }[] = [
+    { key: "", label: "levelAll" },
+    { key: "info", label: "levelInfo" },
+    { key: "success", label: "levelOk" },
+    { key: "warn", label: "levelWarn" },
+    { key: "error", label: "levelErr" },
+  ];
 
   useEffect(() => {
     const params = new URLSearchParams();
     if (level) params.set("level", level);
-    fetch(`/api/logs?${params}`).then((r) => r.json()).then((d) => setLogs(d.logs));
+    fetch(`${BACKEND}/api/logs?${params}`, { headers: authHeaders() })
+      .then((r) => r.json())
+      .then((d) => setLogs(d.logs || []));
   }, [level]);
 
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap gap-1.5">
-        {LEVELS.map((l) => (
+        {levels.map((l) => (
           <button
             key={l.key || "all"}
             onClick={() => setLevel(l.key)}
@@ -36,7 +42,7 @@ export default function LogsPage() {
                 : "border border-border bg-surface text-subtle hover:border-brand/30 hover:text-brand"
             }`}
           >
-            {l.label}
+            {t(l.label)}
           </button>
         ))}
       </div>
@@ -57,7 +63,7 @@ export default function LogsPage() {
             </div>
           ))}
           {logs.length === 0 && (
-            <p className="p-8 text-center text-sm text-muted">Keine Einträge.</p>
+            <p className="p-8 text-center text-sm text-muted">{t("emptyLog")}</p>
           )}
         </div>
       </div>

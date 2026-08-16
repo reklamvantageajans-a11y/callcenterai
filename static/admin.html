@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="tr">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,18 +9,20 @@
     :root{--bg:#f4f5f7;--sf:#fff;--line:#e8eaed;--mu:#8b919c;--tx:#111318;--side:#111827;--act:#1f2937;--br:#4f46e5;--ok:#15803d;--no:#b91c1c}
     *{box-sizing:border-box;margin:0;padding:0}
     body{font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;display:flex}
-    aside{width:220px;background:var(--side);color:#9ca3af;display:flex;flex-direction:column;flex-shrink:0}
-    .brand{padding:22px 18px 18px;color:#fff;font-weight:650;letter-spacing:-.02em;font-size:15px}
+    aside{width:228px;background:var(--side);color:#9ca3af;display:flex;flex-direction:column;flex-shrink:0}
+    .brand{padding:22px 18px 16px;color:#fff;font-weight:650;font-size:15px;letter-spacing:-.02em}
     .brand small{display:block;color:#6b7280;font-weight:500;font-size:11px;margin-top:3px}
-    nav{flex:1;padding:6px 10px}
+    nav{flex:1;padding:4px 10px 16px;overflow:auto}
     nav button{width:100%;text-align:left;background:0;border:0;color:#9ca3af;padding:9px 12px;border-radius:8px;font:inherit;font-size:13px;font-weight:500;cursor:pointer;margin-bottom:1px}
     nav button.on,nav button:hover{background:var(--act);color:#fff}
     main{flex:1;min-width:0;display:flex;flex-direction:column}
-    header{background:#fff;border-bottom:1px solid var(--line);padding:14px 24px;display:flex;justify-content:space-between;align-items:center}
+    header{background:#fff;border-bottom:1px solid var(--line);padding:12px 22px;display:flex;justify-content:space-between;align-items:center;gap:12px}
     header h1{font-size:15px;font-weight:650}
-    .pin{border:1px solid var(--line);border-radius:8px;padding:7px 10px;font:inherit;font-size:12px;width:140px;background:#fafafa}
-    .wrap{padding:22px 24px;overflow:auto}
-    .g4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+    .hdr-right{display:flex;align-items:center;gap:12px}
+    #clock{font-variant-numeric:tabular-nums;font-size:13px;font-weight:600;color:#374151;white-space:nowrap}
+    .pin{border:1px solid var(--line);border-radius:8px;padding:7px 10px;font:inherit;font-size:12px;width:128px;background:#fafafa}
+    .wrap{padding:20px 22px;overflow:auto}
+    .g4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
     .stat{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 16px}
     .stat em{display:block;font-style:normal;font-size:11px;color:var(--mu);font-weight:600;letter-spacing:.04em;text-transform:uppercase}
     .stat b{display:block;font-size:22px;margin-top:6px;letter-spacing:-.03em}
@@ -28,15 +30,16 @@
     h3{font-size:14px;font-weight:650;margin-bottom:12px}
     label{display:block;font-size:12px;font-weight:600;color:#4b5563;margin:12px 0 6px}
     input,select,textarea{width:100%;border:1px solid var(--line);border-radius:8px;padding:10px 12px;font:inherit;font-size:13.5px}
-    textarea{min-height:88px;line-height:1.45}
+    textarea{min-height:120px;line-height:1.45;font-family:ui-monospace,Menlo,monospace;font-size:12.5px}
     .btn{border:0;border-radius:8px;padding:9px 14px;font:inherit;font-size:13px;font-weight:600;cursor:pointer}
-    .pri{background:#111827;color:#fff}.ok{background:var(--ok);color:#fff}.ghost{background:#fff;border:1px solid var(--line)}
+    .pri{background:#111827;color:#fff}.ok{background:var(--ok);color:#fff}.ghost{background:#fff;border:1px solid var(--line)}.danger{background:#fff;border:1px solid #fecaca;color:var(--no)}
+    .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:12px}
     table{width:100%;border-collapse:collapse;font-size:13px}
     th{text-align:left;font-size:11px;color:var(--mu);font-weight:600;padding:8px 10px;border-bottom:1px solid var(--line)}
-    td{padding:10px;border-bottom:1px solid #f3f4f6}
+    td{padding:10px;border-bottom:1px solid #f3f4f6;vertical-align:middle}
     tr.click:hover td{background:#fafafa;cursor:pointer}
-    .voices{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
-    .vc{border:1px solid var(--line);border-radius:10px;padding:12px;cursor:pointer;background:#fff}
+    .voices{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+    .vc{border:1px solid var(--line);border-radius:10px;padding:12px;cursor:pointer}
     .vc.on{border-color:var(--br);box-shadow:0 0 0 3px #eef2ff}
     .vc .g{font-size:11px;color:var(--mu);margin-top:2px}
     .turn{margin:8px 0;padding:10px 12px;border-radius:10px;font-size:13px;line-height:1.5}
@@ -47,188 +50,291 @@
     .msg{font-size:13px;margin-top:10px;color:var(--mu)}
     .err{color:var(--no)}.good{color:var(--ok)}
     .split{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-    @media(max-width:900px){body{flex-direction:column}aside{width:100%;flex-direction:row;overflow:auto;min-height:auto}nav{display:flex}.brand{display:none}.g4,.split,.voices{grid-template-columns:1fr 1fr}}
+    .x{border:0;background:0;color:var(--mu);cursor:pointer;font-size:16px}
+    .hint{font-size:12px;color:var(--mu);line-height:1.5;margin-top:6px}
+    .file{font-size:12px;color:#4b5563}
+    @media(max-width:900px){body{flex-direction:column}aside{width:100%;flex-direction:row;overflow:auto;min-height:auto}nav{display:flex}.brand{display:none}.g4,.split,.voices{grid-template-columns:1fr 1fr}#clock{display:none}}
   </style>
 </head>
 <body>
 <aside>
-  <div class="brand">VK Control<small>Voice operations</small></div>
-  <nav>
-    <button class="on" data-t="dash" onclick="tab('dash')">Übersicht</button>
-    <button data-t="dial" onclick="tab('dial')">Anruf</button>
-    <button data-t="camp" onclick="tab('camp')">Kampagne</button>
-    <button data-t="calls" onclick="tab('calls')">Gespräche</button>
-    <button data-t="recs" onclick="tab('recs')">Aufnahmen</button>
-    <button data-t="voice" onclick="tab('voice')">Stimme</button>
-    <button data-t="open" onclick="tab('open')">Begrüßung</button>
-    <button data-t="cb" onclick="tab('cb')">Rückrufe</button>
-    <button data-t="dnc" onclick="tab('dnc')">Sperrliste</button>
-    <button data-t="drive" onclick="tab('drive')">Drive</button>
-    <button data-t="logs" onclick="tab('logs')">Ereignisse</button>
-  </nav>
+  <div class="brand">VK Control<small id="brandSub">Voice operations</small></div>
+  <nav id="nav"></nav>
 </aside>
 <main>
   <header>
-    <h1 id="title">Übersicht</h1>
-    <input class="pin" id="secret" type="password" placeholder="Zugang" autocomplete="current-password">
+    <h1 id="title"></h1>
+    <div class="hdr-right">
+      <div id="clock"></div>
+      <input class="pin" id="secret" type="password" autocomplete="current-password">
+    </div>
   </header>
   <div class="wrap">
-    <section id="dash">
-      <div class="g4">
-        <div class="stat"><em>Gespräche</em><b id="s-total">0</b></div>
-        <div class="stat"><em>Aktiv</em><b id="s-act">0</b></div>
-        <div class="stat"><em>Kampagnen</em><b id="s-cmp">0</b></div>
-        <div class="stat"><em>Drive</em><b id="s-drv" style="font-size:15px;padding-top:8px">—</b></div>
-      </div>
-    </section>
+    <section id="dash"><div class="g4">
+      <div class="stat"><em data-i="sCalls"></em><b id="s-total">0</b></div>
+      <div class="stat"><em data-i="sActive"></em><b id="s-act">0</b></div>
+      <div class="stat"><em data-i="sCamp"></em><b id="s-cmp">0</b></div>
+      <div class="stat"><em>Drive</em><b id="s-drv" style="font-size:15px;padding-top:8px">—</b></div>
+    </div></section>
 
     <section id="dial" class="card" hidden>
-      <h3>Ausgehend</h3>
-      <label>Nummer</label><input id="to" placeholder="+49 …">
-      <label>Sprache</label><select id="lang"><option value="de">Deutsch</option><option value="tr">Türkisch</option></select>
-      <button class="btn ok" style="margin-top:14px" id="btn" onclick="placeCall()">Anrufen</button>
+      <h3 data-i="dial"></h3>
+      <label data-i="number"></label><input id="to" placeholder="+49 / +90 / 05…">
+      <label data-i="callLang"></label><select id="lang"><option value="de">Deutsch</option><option value="tr">Türkçe</option></select>
+      <button class="btn ok" style="margin-top:14px" onclick="placeCall()" data-i="callBtn"></button>
       <div class="msg" id="msg"></div>
+    </section>
+
+    <section id="nums" hidden>
+      <div class="card">
+        <h3 data-i="bulkAdd"></h3>
+        <p class="hint" data-i="bulkHint"></p>
+        <textarea id="bulk" placeholder="+49 176 12345678&#10;Ahmet +90 555 111 22 33&#10;+4917…; Ayşe"></textarea>
+        <label class="file"><input type="file" id="csv" accept=".csv,.txt,.tsv" onchange="readCsv(event)"></label>
+        <div class="split">
+          <div><label data-i="callLang"></label><select id="bulkLang"><option value="de">Deutsch</option><option value="tr">Türkçe</option></select></div>
+          <div style="display:flex;align-items:flex-end"><button class="btn pri" style="width:100%" onclick="addBulk()" data-i="addList"></button></div>
+        </div>
+        <div class="msg" id="bmsg"></div>
+      </div>
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px">
+          <h3 data-i="leads" style="margin:0"></h3>
+          <span class="msg" id="ccount" style="margin:0"></span>
+        </div>
+        <input id="cq" oninput="renderContacts()" style="margin-bottom:10px">
+        <div class="row">
+          <button class="btn ghost" onclick="toggleAll()" data-i="selectAll"></button>
+          <button class="btn pri" onclick="campFromList()" data-i="dialList"></button>
+          <button class="btn danger" onclick="clearContacts()" data-i="clearList"></button>
+        </div>
+        <table><thead><tr><th></th><th data-i="name"></th><th data-i="number"></th><th data-i="callLang"></th><th data-i="time"></th><th></th></tr></thead><tbody id="ctbody"></tbody></table>
+      </div>
     </section>
 
     <section id="camp" hidden>
       <div class="card">
-        <h3>Kampagne</h3>
-        <label>Name</label><input id="cname" value="Kampagne">
-        <label>Nummern</label><textarea id="cnums" placeholder="+49…"></textarea>
+        <h3 data-i="camp"></h3>
+        <label data-i="name"></label><input id="cname">
+        <label data-i="paste"></label><textarea id="cnums"></textarea>
         <div class="split">
-          <div><label>Sprache</label><select id="clang"><option value="de">Deutsch</option><option value="tr">Türkisch</option></select></div>
-          <div><label>Parallel</label><select id="cpar"><option>1</option><option selected>2</option></select></div>
+          <div><label data-i="callLang"></label><select id="clang"><option value="de">Deutsch</option><option value="tr">Türkçe</option></select></div>
+          <div><label data-i="parallel"></label><select id="cpar"><option>1</option><option selected>2</option></select></div>
         </div>
-        <button class="btn pri" style="margin-top:14px" onclick="startCamp()">Start</button>
+        <button class="btn pri" style="margin-top:14px" onclick="startCamp()" data-i="start"></button>
         <div class="msg" id="cmsg"></div>
       </div>
       <div class="card" id="clist"></div>
     </section>
 
     <section id="calls" class="card" hidden>
-      <input id="q" placeholder="Suche" oninput="loadCalls()" style="margin-bottom:12px">
-      <table><thead><tr><th>Nummer</th><th>Richtung</th><th>Sprache</th><th>Status</th></tr></thead><tbody id="tbody"></tbody></table>
+      <input id="q" oninput="loadCalls()" style="margin-bottom:12px">
+      <table><thead><tr><th data-i="number"></th><th data-i="dir"></th><th data-i="callLang"></th><th>Status</th><th data-i="time"></th></tr></thead><tbody id="tbody"></tbody></table>
       <div id="detail" style="margin-top:16px"></div>
     </section>
 
     <section id="recs" hidden><div id="reclist"></div></section>
 
     <section id="voice" hidden>
-      <div class="card">
-        <h3>Realtime-Stimme</h3>
-        <div class="voices" id="vgrid"></div>
-        <audio id="vprev" style="margin-top:14px;width:100%" controls></audio>
-        <div class="msg" id="vmsg"></div>
-      </div>
+      <div class="card"><h3 data-i="voice"></h3><div class="voices" id="vgrid"></div><audio id="vprev" style="margin-top:14px;width:100%" controls></audio><div class="msg" id="vmsg"></div></div>
     </section>
 
     <section id="open" class="card" hidden>
-      <h3>Begrüßung</h3>
-      <label>Name</label><input id="aname">
-      <label>Deutsch — erster Satz</label><textarea id="gde"></textarea>
-      <label>Türkisch — erster Satz</label><textarea id="gtr"></textarea>
-      <button class="btn pri" style="margin-top:14px" onclick="saveOpen()">Speichern</button>
+      <h3 data-i="open"></h3>
+      <label data-i="name"></label><input id="aname">
+      <label>DE</label><textarea id="gde"></textarea>
+      <label>TR</label><textarea id="gtr"></textarea>
+      <button class="btn pri" style="margin-top:14px" onclick="saveOpen()" data-i="save"></button>
       <div class="msg" id="omsg"></div>
     </section>
 
+    <section id="pref" class="card" hidden>
+      <h3 data-i="pref"></h3>
+      <label data-i="uiLang"></label>
+      <select id="plang"><option value="tr">Türkçe</option><option value="de">Deutsch</option></select>
+      <label data-i="tz"></label>
+      <select id="ptz">
+        <option value="Europe/Istanbul">Europe/Istanbul (TR)</option>
+        <option value="Europe/Berlin">Europe/Berlin (DE)</option>
+        <option value="Europe/Vienna">Europe/Vienna (AT)</option>
+        <option value="Europe/Zurich">Europe/Zurich (CH)</option>
+        <option value="Europe/Amsterdam">Europe/Amsterdam</option>
+        <option value="UTC">UTC</option>
+      </select>
+      <label data-i="clockFmt"></label>
+      <select id="pcf"><option value="24h">24:00</option><option value="12h">12:00</option></select>
+      <button class="btn pri" style="margin-top:14px" onclick="savePref()" data-i="save"></button>
+      <div class="msg" id="pmsg"></div>
+    </section>
+
     <section id="cb" hidden>
-      <div class="card">
-        <h3>Rückruf</h3>
-        <label>Nummer</label><input id="cbp">
-        <label>Notiz</label><input id="cbr">
-        <button class="btn ghost" style="margin-top:12px" onclick="addCb()">Anlegen</button>
+      <div class="card"><h3 data-i="cb"></h3>
+        <label data-i="number"></label><input id="cbp">
+        <label data-i="note"></label><input id="cbr">
+        <button class="btn ghost" style="margin-top:12px" onclick="addCb()" data-i="save"></button>
       </div>
       <div class="card" id="cblist"></div>
     </section>
 
     <section id="dnc" class="card" hidden>
-      <h3>Sperrliste</h3>
-      <label>Nummer</label><input id="dncp">
-      <button class="btn ghost" style="margin-top:12px" onclick="addDnc()">Hinzufügen</button>
+      <h3 data-i="dnc"></h3>
+      <label data-i="number"></label><input id="dncp">
+      <button class="btn ghost" style="margin-top:12px" onclick="addDnc()" data-i="add"></button>
       <div class="msg" id="dncl"></div>
     </section>
 
-    <section id="drive" class="card" hidden>
-      <h3>Google Drive</h3>
-      <p class="msg" id="drvtxt"></p>
-    </section>
-
+    <section id="drive" class="card" hidden><h3>Drive</h3><p class="msg" id="drvtxt"></p></section>
     <section id="logs" class="card" hidden><div id="logl"></div></section>
   </div>
 </main>
 <script>
-const T={dash:'Übersicht',dial:'Anruf',camp:'Kampagne',calls:'Gespräche',recs:'Aufnahmen',voice:'Stimme',open:'Begrüßung',cb:'Rückrufe',dnc:'Sperrliste',drive:'Drive',logs:'Ereignisse'}
+const I18N={
+tr:{
+  dash:'Özet',dial:'Arama',nums:'Numaralar',camp:'Kampanya',calls:'Görüşmeler',recs:'Kayıtlar',voice:'Ses',open:'Açılış',pref:'Panel',cb:'Geri arama',dnc:'Yasak liste',drive:'Drive',logs:'Olaylar',
+  sCalls:'Görüşme',sActive:'Aktif',sCamp:'Kampanya',number:'Numara',callLang:'Görüşme dili',callBtn:'Ara',bulkAdd:'Toplu ekle',paste:'Liste',addList:'Rehbere ekle',leads:'Rehber',dialList:'Seçilenleri ara',name:'Ad',parallel:'Paralel',start:'Başlat',dir:'Yön',time:'Saat',save:'Kaydet',add:'Ekle',note:'Not',uiLang:'Panel dili',tz:'Saat dilimi',clockFmt:'Saat biçimi',listen:'Dinle',female:'Kadın',male:'Erkek',neutral:'Nötr',in:'Gelen',out:'Giden',pin:'Giriş',selectAll:'Tümünü seç',clearList:'Listeyi sil',bulkHint:'Her satıra bir numara. Excel/CSV yapıştırılabilir. 05… Türkiye, 0… Almanya olarak tamamlanır. Yinelenenler atlanır.',search:'Ara'
+},
+de:{
+  dash:'Übersicht',dial:'Anruf',nums:'Nummern',camp:'Kampagne',calls:'Gespräche',recs:'Aufnahmen',voice:'Stimme',open:'Begrüßung',pref:'Panel',cb:'Rückrufe',dnc:'Sperrliste',drive:'Drive',logs:'Ereignisse',
+  sCalls:'Gespräche',sActive:'Aktiv',sCamp:'Kampagnen',number:'Nummer',callLang:'Gesprächssprache',callBtn:'Anrufen',bulkAdd:'Sammelimport',paste:'Liste',addList:'Übernehmen',leads:'Bestand',dialList:'Auswahl anrufen',name:'Name',parallel:'Parallel',start:'Start',dir:'Richtung',time:'Zeit',save:'Speichern',add:'Hinzufügen',note:'Notiz',uiLang:'Panelsprache',tz:'Zeitzone',clockFmt:'Uhrformat',listen:'Anhören',female:'Weiblich',male:'Männlich',neutral:'Neutral',in:'Eingehend',out:'Ausgehend',pin:'Zugang',selectAll:'Alle',clearList:'Liste leeren',bulkHint:'Eine Nummer pro Zeile. Excel/CSV möglich. 05… Türkei, 0… Deutschland. Duplikate werden übersprungen.',search:'Suche'
+}}
+const NAV=['dash','dial','nums','camp','calls','recs','voice','open','pref','cb','dnc','drive','logs']
+let ui='tr', tz='Europe/Istanbul', clockFmt='24h', contacts=[]
+const t=k=>(I18N[ui]&&I18N[ui][k])||k
+const loc=()=>ui==='tr'?'tr-TR':'de-DE'
 const secretEl=document.getElementById('secret')
 secretEl.value=localStorage.getItem('call_secret')||''
 secretEl.onchange=()=>localStorage.setItem('call_secret',secretEl.value.trim())
 const secret=()=>secretEl.value.trim()
 const H=()=>({'Content-Type':'application/json','x-call-secret':secret()})
-function tab(id){document.querySelectorAll('section').forEach(s=>s.hidden=s.id!==id);document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===id));document.getElementById('title').textContent=T[id];refresh()}
-async function j(u,o){const r=await fetch(u,Object.assign({headers:H()},o||{}));if(r.status===401)throw new Error('Zugang');const ct=r.headers.get('content-type')||'';if(ct.includes('json'))return r.json();return r}
+let currentTab='dash'
+
+function applyUi(){
+  document.documentElement.lang=ui
+  document.getElementById('nav').innerHTML=NAV.map(id=>`<button data-t="${id}" onclick="tab('${id}')">${t(id)}</button>`).join('')
+  document.querySelectorAll('[data-i]').forEach(el=>el.textContent=t(el.getAttribute('data-i')))
+  secretEl.placeholder=t('pin')
+  const q=document.getElementById('q'); if(q) q.placeholder=t('search')
+  const cq=document.getElementById('cq'); if(cq) cq.placeholder=t('search')
+  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===currentTab))
+  document.getElementById('title').textContent=t(currentTab)
+}
+function tab(id){
+  currentTab=id
+  document.querySelectorAll('section').forEach(s=>s.hidden=s.id!==id)
+  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===id))
+  document.getElementById('title').textContent=t(id)
+  refresh()
+}
+function timeOpts(extra){
+  return Object.assign({timeZone:tz,hour:'2-digit',minute:'2-digit',hour12:clockFmt==='12h'}, extra||{})
+}
+function fmt(iso){
+  if(!iso) return '—'
+  try{return new Date(iso).toLocaleString(loc(),timeOpts({day:'2-digit',month:'2-digit'}))}catch(e){return iso}
+}
+function tick(){
+  const now=new Date()
+  document.getElementById('clock').textContent=now.toLocaleString(loc(),timeOpts({weekday:'short',day:'2-digit',month:'short',second:'2-digit'}))
+}
+setInterval(tick,1000); tick()
+
+async function j(u,o){const r=await fetch(u,Object.assign({headers:H()},o||{}));if(r.status===401)throw new Error(t('pin'));if((r.headers.get('content-type')||'').includes('json'))return r.json();return r}
 
 async function placeCall(){
-  const msg=document.getElementById('msg'); let to=document.getElementById('to').value.replace(/[\s()-]/g,'')
-  if(!secret()||!to){msg.className='msg err';msg.textContent='Angaben unvollständig.';return}
-  if(!to.startsWith('+')) to='+'+to.replace(/^00/,'')
+  const msg=document.getElementById('msg'); let to=document.getElementById('to').value.trim()
+  if(!secret()||!to){msg.className='msg err';return}
   localStorage.setItem('call_secret',secret())
-  try{const d=await j('/twilio/call',{method:'POST',body:JSON.stringify({to,lang:document.getElementById('lang').value})});msg.className='msg good';msg.textContent=d.sid||'Gestartet'}
+  try{const d=await j('/twilio/call',{method:'POST',body:JSON.stringify({to,lang:document.getElementById('lang').value})});msg.className='msg good';msg.textContent=d.sid||'OK'}
   catch(e){msg.className='msg err';msg.textContent=e.message}
+}
+function readCsv(ev){
+  const f=ev.target.files&&ev.target.files[0]; if(!f)return
+  const r=new FileReader()
+  r.onload=()=>{document.getElementById('bulk').value=(document.getElementById('bulk').value?document.getElementById('bulk').value+'\n':'')+r.result}
+  r.readAsText(f)
+}
+async function addBulk(){
+  const msg=document.getElementById('bmsg')
+  try{
+    const d=await j('/api/contacts',{method:'POST',body:JSON.stringify({text:document.getElementById('bulk').value,lang:document.getElementById('bulkLang').value})})
+    msg.className='msg good'
+    msg.textContent='+'+d.added+(d.skipped? ' · '+d.skipped:'')+(d.invalid? ' · '+d.invalid:'')
+    document.getElementById('bulk').value=''
+    document.getElementById('csv').value=''
+    loadContacts()
+  }catch(e){msg.className='msg err';msg.textContent=e.message}
+}
+async function campFromList(){
+  const selected=[...document.querySelectorAll('.cpick:checked')].map(x=>x.value)
+  const phones=selected.length?selected:contacts.map(c=>c.phone)
+  if(!phones.length)return
+  await j('/api/campaigns',{method:'POST',body:JSON.stringify({name:'List',lang:document.getElementById('bulkLang').value,concurrency:2,text:phones.join('\n')})})
+  tab('camp')
+}
+function toggleAll(){
+  const boxes=[...document.querySelectorAll('.cpick')]
+  const on=boxes.some(b=>!b.checked)
+  boxes.forEach(b=>b.checked=on)
+}
+async function clearContacts(){
+  await fetch('/api/contacts',{method:'DELETE',headers:H()})
+  loadContacts()
 }
 async function startCamp(){
   const msg=document.getElementById('cmsg')
-  try{const d=await j('/api/campaigns',{method:'POST',body:JSON.stringify({name:document.getElementById('cname').value,lang:document.getElementById('clang').value,concurrency:document.getElementById('cpar').value,text:document.getElementById('cnums').value})});msg.className='msg good';msg.textContent=d.total+' in Warteschlange';loadCamps()}
+  try{const d=await j('/api/campaigns',{method:'POST',body:JSON.stringify({name:document.getElementById('cname').value,lang:document.getElementById('clang').value,concurrency:document.getElementById('cpar').value,text:document.getElementById('cnums').value})});msg.className='msg good';msg.textContent=d.total;loadCamps()}
   catch(e){msg.className='msg err';msg.textContent=e.message}
 }
 
-async function refresh(){if(!secret())return;try{await Promise.all([loadCalls(),loadCamps(),loadCbs(),loadDnc(),loadLogs(),loadDrive(),loadStats(),loadVoice(),loadOpen()])}catch(e){}}
+async function refresh(){if(!secret())return;try{await Promise.all([loadCalls(),loadCamps(),loadCbs(),loadDnc(),loadLogs(),loadDrive(),loadStats(),loadVoice(),loadOpen(),loadPref(),loadContacts()])}catch(e){}}
 
 async function loadStats(){
   const s=await j('/api/stats'); const c=await j('/api/campaigns')
   document.getElementById('s-total').textContent=s.totalToday||0
   document.getElementById('s-act').textContent=(s.dialer&&s.dialer.active)||0
   document.getElementById('s-cmp').textContent=(c.campaigns||[]).length
-  document.getElementById('s-drv').textContent=(s.drive&&s.drive.configured)?'Aktiv':'—'
+  document.getElementById('s-drv').textContent=(s.drive&&s.drive.configured)?'●':'—'
 }
-
+async function loadContacts(){
+  const d=await j('/api/contacts')
+  contacts=d.contacts||[]
+  renderContacts()
+}
+function renderContacts(){
+  const q=(document.getElementById('cq')?.value||'').toLowerCase()
+  const rows=contacts.filter(c=>!q||(c.phone||'').toLowerCase().includes(q)||(c.name||'').toLowerCase().includes(q))
+  document.getElementById('ccount').textContent=rows.length+' / '+contacts.length
+  document.getElementById('ctbody').innerHTML=rows.map(c=>`<tr><td><input class="cpick" type="checkbox" value="${c.phone}"></td><td>${(c.name&&c.name!==c.phone)?c.name:'—'}</td><td style="font-variant-numeric:tabular-nums;font-weight:600">${c.phone}</td><td>${(c.lang||'').toUpperCase()}</td><td>${fmt(c.createdAt)}</td><td><button class="x" onclick="delCt('${c.id}')">×</button></td></tr>`).join('')
+}
+async function delCt(id){await fetch('/api/contacts/'+id,{method:'DELETE',headers:H()});loadContacts()}
 async function loadCalls(){
   const q=document.getElementById('q')?.value||''
   const d=await j('/api/calls?q='+encodeURIComponent(q))
-  window._calls=d.calls||[]
-  document.getElementById('tbody').innerHTML=(d.calls||[]).map(c=>`<tr class="click" onclick="show('${c.id}')"><td style="font-variant-numeric:tabular-nums;font-weight:600">${c.phoneNumber||''}</td><td>${c.direction||''}</td><td>${(c.lang||'').toUpperCase()}</td><td>${c.outcome||c.status||''}</td></tr>`).join('')||'<tr><td colspan="4" class="msg">Keine Einträge</td></tr>'
-  document.getElementById('reclist').innerHTML=(d.calls||[]).filter(c=>c.twilioRecordingUrl||c.driveUrl).map(c=>`<div class="card"><div style="font-weight:600;margin-bottom:8px">${c.phoneNumber}</div><audio controls preload="none" src="/api/calls/${c.id}/recording?secret=${encodeURIComponent(secret())}"></audio>${c.driveUrl?`<div class="msg"><a href="${c.driveUrl}" target="_blank">Drive</a></div>`:''}</div>`).join('')||'<div class="card msg">Keine Aufnahmen</div>'
+  document.getElementById('tbody').innerHTML=(d.calls||[]).map(c=>`<tr class="click" onclick="show('${c.id}')"><td style="font-variant-numeric:tabular-nums;font-weight:600">${c.phoneNumber||''}</td><td>${c.direction==='outbound'?t('out'):t('in')}</td><td>${(c.lang||'').toUpperCase()}</td><td>${c.outcome||c.status||''}</td><td>${fmt(c.startedAt)}</td></tr>`).join('')
+  document.getElementById('reclist').innerHTML=(d.calls||[]).filter(c=>c.twilioRecordingUrl||c.driveUrl).map(c=>`<div class="card"><div style="font-weight:600;margin-bottom:8px">${c.phoneNumber} · ${fmt(c.startedAt)}</div><audio controls preload="none" src="/api/calls/${c.id}/recording?secret=${encodeURIComponent(secret())}"></audio></div>`).join('')||`<div class="card msg">—</div>`
 }
 async function show(id){
   const c=await j('/api/calls/'+id)
-  const turns=(c.transcript||[]).map(t=>`<div class="turn ${t.role}"><div class="who">${t.role==='agent'?'Agent':'Kunde'}</div>${(t.text||'').replace(/</g,'')}</div>`).join('')||'<p class="msg">Noch kein Transkript</p>'
+  const turns=(c.transcript||[]).map(x=>`<div class="turn ${x.role}"><div class="who">${x.role}</div>${(x.text||'').replace(/</g,'')}</div>`).join('')
   const rec=c.twilioRecordingUrl?`<audio controls src="/api/calls/${c.id}/recording?secret=${encodeURIComponent(secret())}"></audio>`:''
-  document.getElementById('detail').innerHTML=`<h3>${c.phoneNumber}</h3>${turns}${rec}`
+  document.getElementById('detail').innerHTML=`<h3>${c.phoneNumber} · ${fmt(c.startedAt)}</h3>${turns||''}${rec}`
 }
 async function loadCamps(){
   const d=await j('/api/campaigns')
   document.getElementById('clist').innerHTML=(d.campaigns||[]).map(c=>{
     const pct=c.total?Math.round(100*(c.done||0)/c.total):0
-    return `<div style="margin-bottom:16px"><div style="display:flex;justify-content:space-between"><b>${c.name}</b><span class="msg">${c.status} · ${c.done||0}/${c.total}</span></div><div class="bar"><i style="width:${pct}%"></i></div>${(c.numbers||[]).slice(0,30).map(n=>`<div class="msg">${n.phone} · ${n.status}</div>`).join('')}</div>`
-  }).join('')||'<span class="msg">Keine Kampagne</span>'
+    return `<div style="margin-bottom:16px"><div style="display:flex;justify-content:space-between"><b>${c.name}</b><span class="msg">${c.status} · ${c.done||0}/${c.total} · ${fmt(c.createdAt)}</span></div><div class="bar"><i style="width:${pct}%"></i></div>${(c.numbers||[]).slice(0,40).map(n=>`<div class="msg">${n.phone} · ${n.status}</div>`).join('')}</div>`
+  }).join('')
 }
 async function loadVoice(){
-  const d=await j('/api/voices')
-  const sel=d.selected
-  document.getElementById('vgrid').innerHTML=(d.voices||[]).map(v=>`
-    <div class="vc ${v.id===sel?'on':''}" onclick="pickVoice('${v.id}')">
-      <div style="font-weight:650">${v.label}</div>
-      <div class="g">${v.gender==='female'?'Weiblich':v.gender==='male'?'Männlich':'Neutral'}</div>
-      <button class="btn ghost" style="margin-top:8px;width:100%" onclick="event.stopPropagation();preview('${v.id}')">Anhören</button>
-    </div>`).join('')
+  const d=await j('/api/voices'); const sel=d.selected
+  document.getElementById('vgrid').innerHTML=(d.voices||[]).map(v=>`<div class="vc ${v.id===sel?'on':''}" onclick="pickVoice('${v.id}')"><div style="font-weight:650">${v.label}</div><div class="g">${t(v.gender)}</div><button class="btn ghost" style="margin-top:8px;width:100%" onclick="event.stopPropagation();preview('${v.id}')">${t('listen')}</button></div>`).join('')
 }
-async function pickVoice(id){
-  await j('/api/settings',{method:'POST',body:JSON.stringify({voice:id})})
-  loadVoice()
-}
+async function pickVoice(id){await j('/api/settings',{method:'POST',body:JSON.stringify({voice:id})});loadVoice()}
 async function preview(id){
-  const msg=document.getElementById('vmsg'); msg.textContent='…'
-  const r=await fetch('/api/voices/preview',{method:'POST',headers:H(),body:JSON.stringify({voice:id,lang:document.getElementById('lang')?.value||'de'})})
-  if(!r.ok){msg.className='msg err';msg.textContent='Vorschau nicht verfügbar';return}
-  const b=await r.blob(); const a=document.getElementById('vprev'); a.src=URL.createObjectURL(b); a.play(); msg.textContent=''
+  const r=await fetch('/api/voices/preview',{method:'POST',headers:H(),body:JSON.stringify({voice:id,lang:document.getElementById('lang').value})})
+  if(!r.ok)return
+  const a=document.getElementById('vprev'); a.src=URL.createObjectURL(await r.blob()); a.play()
 }
 async function loadOpen(){
   const s=await j('/api/settings')
@@ -238,16 +344,37 @@ async function loadOpen(){
 }
 async function saveOpen(){
   await j('/api/settings',{method:'POST',body:JSON.stringify({agentName:document.getElementById('aname').value,greetingDe:document.getElementById('gde').value,greetingTr:document.getElementById('gtr').value})})
-  document.getElementById('omsg').className='msg good'; document.getElementById('omsg').textContent='Gespeichert'
+  document.getElementById('omsg').className='msg good';document.getElementById('omsg').textContent=t('save')
+}
+async function loadPref(){
+  const s=await j('/api/settings')
+  const nui=s.panelLang==='de'?'de':'tr'
+  const ntz=s.timezone||'Europe/Istanbul'
+  const ncf=s.clockFormat==='12h'?'12h':'24h'
+  const changed=nui!==ui||ntz!==tz||ncf!==clockFmt
+  ui=nui; tz=ntz; clockFmt=ncf
+  document.getElementById('plang').value=ui
+  document.getElementById('ptz').value=tz
+  document.getElementById('pcf').value=clockFmt
+  if(changed){ applyUi(); tick() }
+}
+async function savePref(){
+  ui=document.getElementById('plang').value
+  tz=document.getElementById('ptz').value
+  clockFmt=document.getElementById('pcf').value
+  await j('/api/settings',{method:'POST',body:JSON.stringify({panelLang:ui,timezone:tz,clockFormat:clockFmt})})
+  applyUi(); tick(); document.getElementById('pmsg').className='msg good'; document.getElementById('pmsg').textContent=t('save')
 }
 async function addCb(){await j('/api/callbacks',{method:'POST',body:JSON.stringify({phone:document.getElementById('cbp').value,reason:document.getElementById('cbr').value})});loadCbs()}
-async function loadCbs(){const d=await j('/api/callbacks');document.getElementById('cblist').innerHTML=(d.callbacks||[]).map(x=>`<div class="msg"><b>${x.phoneNumber}</b> ${x.reason||''}</div>`).join('')||'<span class="msg">—</span>'}
+async function loadCbs(){const d=await j('/api/callbacks');document.getElementById('cblist').innerHTML=(d.callbacks||[]).map(x=>`<div class="msg"><b>${x.phoneNumber}</b> · ${fmt(x.scheduledAt)} · ${x.reason||''}</div>`).join('')||'—'}
 async function addDnc(){await j('/api/dnc',{method:'POST',body:JSON.stringify({phone:document.getElementById('dncp').value})});loadDnc()}
 async function loadDnc(){const d=await j('/api/dnc');document.getElementById('dncl').textContent=(d.numbers||[]).join('  ·  ')||'—'}
-async function loadLogs(){const d=await j('/api/logs');document.getElementById('logl').innerHTML=(d.logs||[]).map(l=>`<div class="msg">${l.source} — ${l.message}</div>`).join('')}
-async function loadDrive(){const d=await j('/api/drive');document.getElementById('drvtxt').textContent=d.configured?'Verbunden':'Nicht verbunden'}
+async function loadLogs(){const d=await j('/api/logs');document.getElementById('logl').innerHTML=(d.logs||[]).map(l=>`<div class="msg">${fmt(l.ts)} · ${l.source} — ${l.message}</div>`).join('')}
+async function loadDrive(){const d=await j('/api/drive');document.getElementById('drvtxt').textContent=d.configured?'●':'—'}
 
-refresh(); setInterval(refresh,10000)
+applyUi()
+refresh()
+setInterval(refresh,10000)
 </script>
 </body>
 </html>

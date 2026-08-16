@@ -1,8 +1,10 @@
 import os
+import re
 import json
 import asyncio
 import html
 from dotenv import load_dotenv
+from typing import Optional
 from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
 from fastapi.responses import FileResponse, Response, JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -35,11 +37,95 @@ async def admin():
 async def panel_page():
     return FileResponse("static/admin.html")
 
-def normalize_phone(raw: str) -> str:
+_HEADER_WORDS = {
+    "phone", "telefon", "nummer", "numara", "name", "ad", "soyad",
+    "kontakt", "contact", "tel", "handy", "mobile", "cep", "vorname",
+    "nachname", "isim",
+}
+
+
+def _default_cc(lang: str) -> str:
+    return "+90" if lang == "tr" else "+49"
+
+
+def normalize_phone(raw: str, default_cc: Optional[str] = None) -> str:
     to = "".join(ch for ch in str(raw or "") if ch.isdigit() or ch == "+")
     if to.startswith("00"):
         to = "+" + to[2:]
+    if not to:
+        return ""
+    if to.startswith("+"):
+        return to
+    cc = default_cc or "+49"
+    if to.startswith("90") and len(to) >= 12:
+        return "+" + to
+    if to.startswith("49") and len(to) >= 11:
+        return "+" + to
+    if to.startswith("0"):
+        rest = to[1:]
+        if rest.startswith("5") and len(rest) >= 10:
+            return "+90" + rest
+        if rest[:2] in ("15", "16", "17") and len(rest) >= 10:
+            return "+49" + rest
+        return cc + rest
+    if len(to) >= 8:
+        return cc + to
     return to
+
+
+def parse_leads(raw, lang="de"):
+    """Parse pasted Excel/CSV/text into unique {phone, name} rows. Returns (rows, invalid)."""
+    cc = _default_cc(lang)
+    if isinstance(raw, list):
+        lines = [str(x) for x in raw]
+    else:
+        text = str(raw or "").replace("\r\n", "\n").replace("\r", "\n")
+        lines = text.split("\n")
+    seen = set()
+    rows = []
+    invalid = 0
+    for line in lines:
+        s = line.strip().strip('"').strip("'")
+        if not s:
+            continue
+        compact = re.sub(r"[^a-z]+", "", s.lower())
+        if compact in _HEADER_WORDS or not any(ch.isdigit() for ch in s):
+            continue
+        parts = re.split(r"[\t;]+", s)
+        if len(parts) == 1 and "," in s and not s.lstrip().startswith("+"):
+            parts = [p.strip() for p in s.split(",")]
+        phone = ""
+        names = []
+        found = None
+        for match in re.finditer(r"(?:\+|00)?\d[\d\s()./-]{6,24}\d", s):
+            p = normalize_phone(match.group(0), cc)
+            if p.startswith("+") and len(p) >= 10:
+                phone = p
+                found = match
+                break
+        if found:
+            leftover = (s[: found.start()] + " " + s[found.end() :]).strip(" ,;\t-")
+            if leftover:
+                names.append(leftover)
+        else:
+            for part in parts:
+                p = normalize_phone(part, cc)
+                if p.startswith("+") and len(p) >= 10 and not phone:
+                    phone = p
+                else:
+                    bit = part.strip().strip('"')
+                    if bit and re.sub(r"[^a-z]+", "", bit.lower()) not in _HEADER_WORDS:
+                        names.append(bit)
+        if not phone:
+            phone = normalize_phone(s, cc)
+            names = []
+        if phone.startswith("+") and len(phone) >= 10:
+            if phone not in seen:
+                seen.add(phone)
+                rows.append({"phone": phone, "name": " ".join(names).strip()})
+        else:
+            invalid += 1
+    return rows, invalid
 
 
 def place_outbound_call(to: str, lang: str = "de") -> dict:
@@ -48,10 +134,10 @@ def place_outbound_call(to: str, lang: str = "de") -> dict:
     frm = os.getenv("TWILIO_PHONE_NUMBER", "")
     if not (sid and token and frm):
         raise RuntimeError("twilio env missing")
-    to = normalize_phone(to)
-    if not to.startswith("+"):
-        raise RuntimeError("to must be E.164 like +49...")
     lang = lang if lang in ("tr", "de") else "de"
+    to = normalize_phone(to, _default_cc(lang))
+    if not to.startswith("+") or len(to) < 10:
+        raise RuntimeError("to must be E.164 like +49...")
     if to in set(ops_store.list_dnc()):
         raise RuntimeError("DNC")
     from twilio.rest import Client
@@ -144,11 +230,11 @@ async def twilio_call(request: Request):
     if not (sid and token and frm):
         return JSONResponse({"error": "twilio env missing"}, status_code=500)
     body = await request.json()
-    to = normalize_phone(body.get("to"))
     lang = body.get("lang", "de")
-    if not to.startswith("+"):
-        return JSONResponse({"error": "to must be E.164 like +49..."}, status_code=400)
     lang = lang if lang in ("tr", "de") else "de"
+    to = normalize_phone(body.get("to"), _default_cc(lang))
+    if not to.startswith("+") or len(to) < 10:
+        return JSONResponse({"error": "to must be E.164 like +49..."}, status_code=400)
     try:
         result = place_outbound_call(to, lang)
     except Exception as e:
@@ -306,16 +392,9 @@ async def api_campaigns_create(request: Request):
     if not _require_secret(request):
         return JSONResponse({"error": "unauthorized"}, status_code=401)
     body = await request.json()
-    raw = body.get("numbers") or body.get("text") or ""
-    if isinstance(raw, list):
-        lines = raw
-    else:
-        lines = str(raw).replace(";", "\n").replace(",", "\n").split()
-    numbers = []
-    for line in lines:
-        p = normalize_phone(line)
-        if p.startswith("+") and p not in numbers:
-            numbers.append(p)
+    lang = body.get("lang") or "de"
+    leads, _inv = parse_leads(body.get("numbers") or body.get("text") or "", lang)
+    numbers = [x["phone"] for x in leads]
     if not numbers:
         return JSONResponse({"error": "numara yok"}, status_code=400)
     row = ops_store.new_campaign(
@@ -437,6 +516,41 @@ async def api_settings_post(request: Request):
         return JSONResponse({"error": "unauthorized"}, status_code=401)
     body = await request.json()
     return ops_store.save_settings(body)
+
+
+@app.get("/api/contacts")
+async def api_contacts_get(request: Request):
+    if not _require_secret(request):
+        return JSONResponse({"error": "unauthorized"}, status_code=401)
+    return {"contacts": ops_store.list_contacts()}
+
+
+@app.post("/api/contacts")
+async def api_contacts_post(request: Request):
+    if not _require_secret(request):
+        return JSONResponse({"error": "unauthorized"}, status_code=401)
+    body = await request.json()
+    lang = body.get("lang") or "de"
+    leads, invalid = parse_leads(body.get("numbers") or body.get("text") or "", lang)
+    if not leads:
+        return JSONResponse({"error": "empty", "invalid": invalid}, status_code=400)
+    result = ops_store.add_contacts(leads, lang)
+    result["invalid"] = invalid
+    return result
+
+
+@app.delete("/api/contacts")
+async def api_contacts_clear(request: Request):
+    if not _require_secret(request):
+        return JSONResponse({"error": "unauthorized"}, status_code=401)
+    return {"contacts": ops_store.clear_contacts()}
+
+
+@app.delete("/api/contacts/{cid}")
+async def api_contacts_del(cid: str, request: Request):
+    if not _require_secret(request):
+        return JSONResponse({"error": "unauthorized"}, status_code=401)
+    return {"contacts": ops_store.delete_contact(cid)}
 
 
 @app.post("/api/calls/{call_id}/outcome")

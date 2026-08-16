@@ -10,20 +10,22 @@ import {
   YAxis,
 } from "recharts";
 import type { Stats } from "@/lib/types";
+import { useI18n } from "@/lib/i18n";
 
 export function HourlyChart({ data }: { data: Stats["hourly"] }) {
+  const { t } = useI18n();
   return (
     <div className="card p-5">
       <div className="mb-4 flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-text">Anrufe pro Stunde</h3>
+        <h3 className="text-sm font-semibold text-text">{t("hourly")}</h3>
         <div className="flex items-center gap-4 text-xs text-subtle">
           <span className="flex items-center gap-1.5">
             <span className="h-2.5 w-2.5 rounded-sm" style={{ background: "#4f46e5" }} />
-            Anrufe
+            {t("sCalls")}
           </span>
           <span className="flex items-center gap-1.5">
             <span className="h-2.5 w-2.5 rounded-sm" style={{ background: "#16a34a" }} />
-            Konvertiert
+            {t("conversions")}
           </span>
         </div>
       </div>
@@ -53,8 +55,8 @@ export function HourlyChart({ data }: { data: Stats["hourly"] }) {
               }}
               labelStyle={{ color: "#0f172a", fontWeight: 600, marginBottom: 4 }}
             />
-            <Area type="monotone" dataKey="calls" stroke="#4f46e5" strokeWidth={2} fill="url(#gCalls)" name="Anrufe" dot={false} />
-            <Area type="monotone" dataKey="conversions" stroke="#16a34a" strokeWidth={2} fill="url(#gConv)" name="Konvertiert" dot={false} />
+            <Area type="monotone" dataKey="calls" stroke="#4f46e5" strokeWidth={2} fill="url(#gCalls)" name={t("sCalls")} dot={false} />
+            <Area type="monotone" dataKey="conversions" stroke="#16a34a" strokeWidth={2} fill="url(#gConv)" name={t("conversions")} dot={false} />
           </AreaChart>
         </ResponsiveContainer>
       </div>

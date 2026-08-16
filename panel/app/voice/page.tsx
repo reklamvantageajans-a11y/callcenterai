@@ -2,10 +2,12 @@
 
 import { useEffect, useRef, useState } from "react";
 import { authHeaders, BACKEND } from "@/lib/backend";
+import { useI18n } from "@/lib/i18n";
 
 type Voice = { id: string; gender: string; label: string };
 
 export default function VoicePage() {
+  const { t, lang } = useI18n();
   const [voices, setVoices] = useState<Voice[]>([]);
   const [selected, setSelected] = useState("");
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -35,12 +37,15 @@ export default function VoicePage() {
     const r = await fetch(`${BACKEND}/api/voices/preview`, {
       method: "POST",
       headers: { ...authHeaders(), "Content-Type": "application/json" },
-      body: JSON.stringify({ voice: id, lang: "de" }),
+      body: JSON.stringify({ voice: id, lang }),
     });
     if (!r.ok || !audioRef.current) return;
     audioRef.current.src = URL.createObjectURL(await r.blob());
     audioRef.current.play();
   };
+
+  const gender = (g: string) =>
+    g === "female" ? t("female") : g === "male" ? t("male") : t("neutral");
 
   return (
     <div className="space-y-4">
@@ -52,9 +57,7 @@ export default function VoicePage() {
             className={`card p-4 text-left ${selected === v.id ? "ring-2 ring-brand" : ""}`}
           >
             <div className="font-semibold">{v.label}</div>
-            <div className="mt-0.5 text-xs text-muted">
-              {v.gender === "female" ? "Weiblich" : v.gender === "male" ? "Männlich" : "Neutral"}
-            </div>
+            <div className="mt-0.5 text-xs text-muted">{gender(v.gender)}</div>
             <span
               className="mt-3 inline-block text-xs font-medium text-brand"
               onClick={(e) => {
@@ -62,7 +65,7 @@ export default function VoicePage() {
                 preview(v.id);
               }}
             >
-              Anhören
+              {t("listen")}
             </span>
           </button>
         ))}

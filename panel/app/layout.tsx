@@ -2,10 +2,11 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Sidebar } from "@/components/Sidebar";
 import { Topbar } from "@/components/Topbar";
+import { Providers } from "@/components/Providers";
 
 export const metadata: Metadata = {
-  title: "Callcenter Kontrollpanel",
-  description: "Live-Übersicht: Anrufe, Rückrufe, Aufnahmen und Logs",
+  title: "VK Control",
+  description: "Callcenter Kontrollpanel",
 };
 
 export default function RootLayout({
@@ -14,15 +15,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="de">
+    <html lang="tr">
       <body>
-        <div className="relative z-10 flex min-h-screen">
-          <Sidebar />
-          <div className="flex min-w-0 flex-1 flex-col">
-            <Topbar />
-            <main className="flex-1 p-4 md:p-6">{children}</main>
+        <Providers>
+          <div className="relative z-10 flex min-h-screen">
+            <Sidebar />
+            <div className="flex min-w-0 flex-1 flex-col">
+              <Topbar />
+              <main className="flex-1 p-4 md:p-6">{children}</main>
+            </div>
           </div>
-        </div>
+        </Providers>
       </body>
     </html>
   );

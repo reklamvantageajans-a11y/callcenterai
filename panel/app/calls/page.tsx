@@ -5,22 +5,26 @@ import { Search, FileText, PhoneOutgoing, PhoneIncoming } from "lucide-react";
 import { OutcomeBadge, StatusBadge } from "@/components/Badges";
 import { fmtClock, fmtDuration } from "@/lib/format";
 import { authHeaders, BACKEND, recordingSrc } from "@/lib/backend";
+import { useI18n, type I18nKey } from "@/lib/i18n";
 import type { Call, CallOutcome } from "@/lib/types";
 
-const FILTERS: { key: CallOutcome | ""; label: string }[] = [
-  { key: "", label: "Alle" },
-  { key: "converted", label: "Konvertiert" },
-  { key: "callback", label: "Rückruf" },
-  { key: "not_interested", label: "Kein Interesse" },
-  { key: "no_answer", label: "Nicht erreicht" },
-  { key: "in_progress", label: "Läuft" },
-];
-
 export default function CallsPage() {
+  const { t, tick } = useI18n();
+  void tick;
   const [calls, setCalls] = useState<Call[]>([]);
   const [q, setQ] = useState("");
   const [outcome, setOutcome] = useState<CallOutcome | "">("");
   const [loading, setLoading] = useState(true);
+  const [open, setOpen] = useState<Call | null>(null);
+
+  const filters: { key: CallOutcome | ""; label: I18nKey }[] = [
+    { key: "", label: "all" },
+    { key: "converted", label: "converted" },
+    { key: "callback", label: "callback" },
+    { key: "not_interested", label: "notInterested" },
+    { key: "no_answer", label: "noAnswer" },
+    { key: "in_progress", label: "inProgress" },
+  ];
 
   useEffect(() => {
     const load = async () => {
@@ -34,27 +38,24 @@ export default function CallsPage() {
       setCalls(r.calls || []);
       setLoading(false);
     };
-    const t = setTimeout(load, 200);
-    return () => clearTimeout(t);
+    const tmr = setTimeout(load, 200);
+    return () => clearTimeout(tmr);
   }, [q, outcome]);
-
-  const [open, setOpen] = useState<Call | null>(null);
 
   return (
     <div className="space-y-4">
-      {/* Toolbar */}
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div className="relative w-full md:max-w-xs">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Name oder Nummer…"
+            placeholder={t("search")}
             className="w-full rounded-lg border border-border bg-surface py-2 pl-9 pr-3 text-sm text-text outline-none placeholder:text-muted focus:border-brand/50 focus:ring-2 focus:ring-brand/10"
           />
         </div>
         <div className="flex flex-wrap gap-1.5">
-          {FILTERS.map((f) => (
+          {filters.map((f) => (
             <button
               key={f.key || "all"}
               onClick={() => setOutcome(f.key)}
@@ -64,26 +65,25 @@ export default function CallsPage() {
                   : "border border-border bg-surface text-subtle hover:border-brand/30 hover:text-brand"
               }`}
             >
-              {f.label}
+              {t(f.label)}
             </button>
           ))}
         </div>
       </div>
 
-      {/* Table */}
       <div className="card overflow-hidden p-0">
         <div className="scrollbar-thin overflow-x-auto">
           <table className="w-full min-w-[860px] text-sm">
             <thead className="border-b border-border bg-surface2">
               <tr className="text-left text-[11px] font-medium uppercase tracking-wide text-muted">
-                <th className="px-4 py-3">Kontakt</th>
-                <th className="px-4 py-3">Nummer</th>
-                <th className="px-4 py-3">Richtung</th>
-                <th className="px-4 py-3">Zeit</th>
-                <th className="px-4 py-3">Dauer</th>
-                <th className="px-4 py-3">Status</th>
-                <th className="px-4 py-3">Ergebnis</th>
-                <th className="px-4 py-3">Aufnahme</th>
+                <th className="px-4 py-3">{t("contact")}</th>
+                <th className="px-4 py-3">{t("number")}</th>
+                <th className="px-4 py-3">{t("dir")}</th>
+                <th className="px-4 py-3">{t("time")}</th>
+                <th className="px-4 py-3">{t("duration")}</th>
+                <th className="px-4 py-3">{t("status")}</th>
+                <th className="px-4 py-3">{t("outcome")}</th>
+                <th className="px-4 py-3">{t("rec")}</th>
               </tr>
             </thead>
             <tbody>
@@ -106,11 +106,11 @@ export default function CallsPage() {
                   <td className="px-4 py-3">
                     {c.direction === "outbound" ? (
                       <span className="flex items-center gap-1 text-xs font-medium text-brand">
-                        <PhoneOutgoing className="h-3.5 w-3.5" /> Ausgehend
+                        <PhoneOutgoing className="h-3.5 w-3.5" /> {t("outbound")}
                       </span>
                     ) : (
                       <span className="flex items-center gap-1 text-xs font-medium text-success">
-                        <PhoneIncoming className="h-3.5 w-3.5" /> Eingehend
+                        <PhoneIncoming className="h-3.5 w-3.5" /> {t("inbound")}
                       </span>
                     )}
                   </td>
@@ -130,10 +130,10 @@ export default function CallsPage() {
             </tbody>
           </table>
           {!loading && calls.length === 0 && (
-            <p className="p-8 text-center text-sm text-muted">Keine Anrufe gefunden.</p>
+            <p className="p-8 text-center text-sm text-muted">{t("emptyCalls")}</p>
           )}
           {loading && (
-            <p className="p-8 text-center text-sm text-muted">Wird geladen…</p>
+            <p className="p-8 text-center text-sm text-muted">{t("loading")}</p>
           )}
         </div>
       </div>
@@ -142,23 +142,23 @@ export default function CallsPage() {
         <div className="card space-y-3 p-4">
           <div className="flex items-center justify-between">
             <p className="font-medium">{open.phoneNumber}</p>
-            <button className="text-xs text-muted" onClick={() => setOpen(null)}>Kapat</button>
+            <button className="text-xs text-muted" onClick={() => setOpen(null)}>{t("close")}</button>
           </div>
-          {(open.transcript || []).map((t, i) => (
+          {(open.transcript || []).map((tr, i) => (
             <div
               key={i}
               className={`rounded-lg px-3 py-2 text-sm ${
-                t.role === "agent" ? "bg-surface2 text-text" : "bg-successLight text-text"
+                tr.role === "agent" ? "bg-surface2 text-text" : "bg-successLight text-text"
               }`}
             >
               <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-muted">
-                {t.role === "agent" ? "Agent" : "Kunde"}
+                {tr.role === "agent" ? t("agent") : t("customer")}
               </p>
-              {t.text}
+              {tr.text}
             </div>
           ))}
           {!(open.transcript || []).length && (
-            <p className="text-sm text-muted">Noch kein Transkript.</p>
+            <p className="text-sm text-muted">{t("noTranscript")}</p>
           )}
         </div>
       )}
