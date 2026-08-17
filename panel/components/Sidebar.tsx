@@ -13,6 +13,7 @@ import {
   HardDrive,
   Settings,
   Users,
+  Beaker,
 } from "lucide-react";
 import { useI18n, type I18nKey } from "@/lib/i18n";
 import type { LucideIcon } from "lucide-react";
@@ -29,6 +30,7 @@ export function useNav(): NavItem[] {
     { href: "/callbacks", label: t("cb"), icon: PhoneForwarded, key: "cb" },
     { href: "/recordings", label: t("recs"), icon: Mic, key: "recs" },
     { href: "/voice", label: t("voice"), icon: Headset, key: "voice" },
+    { href: "/test", label: t("lab"), icon: Beaker, key: "lab" },
     { href: "/drive", label: t("drive"), icon: HardDrive, key: "drive" },
     { href: "/logs", label: t("logs"), icon: ScrollText, key: "logs" },
     { href: "/settings", label: t("pref"), icon: Settings, key: "pref" },
@@ -41,7 +43,7 @@ export function Sidebar() {
   const nav = useNav();
   const groups: { label: I18nKey; hrefs: string[] }[] = [
     { label: "gOps", hrefs: ["/", "/contacts", "/campaigns", "/calls", "/callbacks"] },
-    { label: "gLib", hrefs: ["/recordings", "/voice", "/drive"] },
+    { label: "gLib", hrefs: ["/recordings", "/voice", "/test", "/drive"] },
     { label: "gSys", hrefs: ["/logs", "/settings"] },
   ];
 

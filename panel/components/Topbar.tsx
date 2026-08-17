@@ -17,6 +17,7 @@ const TITLES: Record<string, I18nKey> = {
   "/recordings": "titleRecs",
   "/drive": "titleDrive",
   "/voice": "titleVoice",
+  "/test": "titleLab",
   "/logs": "titleLogs",
   "/settings": "titlePref",
 };

@@ -83,6 +83,13 @@
     .x{border:0;background:0;color:var(--mu);cursor:pointer;font-size:16px}
     .hint{font-size:12px;color:var(--mu);line-height:1.5;margin-top:6px}
     .file{font-size:12px;color:#4b5563}
+    .lab-feed{max-height:52vh;overflow:auto;padding:4px 0 8px}
+    .lab-turn{margin:0 0 14px;max-width:92%}
+    .lab-turn.user{margin-left:auto;background:#111827;color:#fff;border-radius:12px 12px 4px 12px;padding:10px 12px;font-size:13.5px;line-height:1.45}
+    .lab-turn.agent{background:#f8fafc;border:1px solid var(--line);border-radius:12px 12px 12px 4px;padding:12px 14px}
+    .lab-fmt{white-space:pre-wrap;font-family:ui-monospace,Menlo,monospace;font-size:12px;line-height:1.55;color:#1e293b;margin:0}
+    .lab-in{display:flex;gap:8px;margin-top:12px}
+    .lab-in input{flex:1}
     @media(max-width:980px){body{flex-direction:column}aside{width:100%;flex-direction:row;overflow:auto;min-height:auto}.brand,.side-foot,.nav-l{display:none}nav{display:flex;padding:8px}.kpi,.split,.voices,.dash-grid{grid-template-columns:1fr 1fr}#clock-tz{display:none}}
   </style>
 </head>
@@ -199,6 +206,25 @@
       <div class="card"><h3 data-i="voice"></h3><div class="voices" id="vgrid"></div><audio id="vprev" style="margin-top:14px;width:100%" controls></audio><div class="msg" id="vmsg"></div></div>
     </section>
 
+    <section id="lab" hidden>
+      <div class="card">
+        <div class="card-head">
+          <h3 data-i="lab"></h3>
+          <div class="row" style="margin:0">
+            <select id="labLang" onchange="labReset()"><option value="de">Deutsch</option><option value="tr">Türkçe</option></select>
+            <button class="btn ghost" onclick="labReset()" data-i="labReset"></button>
+            <button class="btn pri" onclick="labStart()" data-i="labStart"></button>
+          </div>
+        </div>
+        <div class="lab-feed" id="labFeed"></div>
+        <div class="lab-in">
+          <input id="labMsg" placeholder="" onkeydown="if(event.key==='Enter')labSend()">
+          <button class="btn pri" onclick="labSend()" data-i="labSend"></button>
+        </div>
+        <audio id="labAudio"></audio>
+      </div>
+    </section>
+
     <section id="open" class="card" hidden>
       <h3 data-i="open"></h3>
       <label data-i="name"></label><input id="aname">
@@ -250,16 +276,16 @@
 <script>
 const I18N={
 tr:{
-  dash:'Özet',dial:'Arama',nums:'Numaralar',camp:'Kampanya',calls:'Görüşmeler',recs:'Kayıtlar',voice:'Ses',open:'Açılış',pref:'Ayarlar',cb:'Geri arama',dnc:'Yasak liste',drive:'Drive',logs:'Olaylar',
+  dash:'Özet',dial:'Arama',nums:'Numaralar',camp:'Kampanya',calls:'Görüşmeler',recs:'Kayıtlar',voice:'Ses',lab:'Test',open:'Açılış',pref:'Ayarlar',cb:'Geri arama',dnc:'Yasak liste',drive:'Drive',logs:'Olaylar',
   gOps:'Operasyon',gLib:'Kayıt',gSys:'Sistem',brandSub:'Operations',online:'Çevrimiçi',
   sCalls:'Bugün',sActive:'Aktif hat',sCamp:'Kampanya',sAnswered:'Açılan',hourly:'Saatlik dağılım',recent:'Son görüşmeler',activity:'Canlı akış',showAll:'Tümü',
-  number:'Numara',callLang:'Görüşme dili',callBtn:'Ara',bulkAdd:'Toplu ekle',paste:'Liste',addList:'Rehbere ekle',leads:'Rehber',dialList:'Seçilenleri ara',name:'Ad',parallel:'Paralel',start:'Başlat',dir:'Yön',time:'Saat',save:'Kaydet',add:'Ekle',note:'Not',uiLang:'Panel dili',tz:'Saat dilimi',clockFmt:'Saat biçimi',listen:'Dinle',female:'Kadın',male:'Erkek',neutral:'Nötr',in:'Gelen',out:'Giden',pin:'Giriş',selectAll:'Tümünü seç',clearList:'Listeyi sil',bulkHint:'Her satıra bir numara. Excel/CSV yapıştırılabilir. 05… Türkiye, 0… Almanya olarak tamamlanır. Yinelenenler atlanır.',search:'Ara'
+  number:'Numara',callLang:'Görüşme dili',callBtn:'Ara',bulkAdd:'Toplu ekle',paste:'Liste',addList:'Rehbere ekle',leads:'Rehber',dialList:'Seçilenleri ara',name:'Ad',parallel:'Paralel',start:'Başlat',dir:'Yön',time:'Saat',save:'Kaydet',add:'Ekle',note:'Not',uiLang:'Panel dili',tz:'Saat dilimi',clockFmt:'Saat biçimi',listen:'Dinle',female:'Kadın',male:'Erkek',neutral:'Nötr',in:'Gelen',out:'Giden',pin:'Giriş',selectAll:'Tümünü seç',clearList:'Listeyi sil',bulkHint:'Her satıra bir numara. Excel/CSV yapıştırılabilir. 05… Türkiye, 0… Almanya olarak tamamlanır. Yinelenenler atlanır.',search:'Ara',labReset:'Sıfırla',labStart:'Açılış',labSend:'Gönder',labCust:'Müşteri'
 },
 de:{
-  dash:'Übersicht',dial:'Anruf',nums:'Nummern',camp:'Kampagne',calls:'Gespräche',recs:'Aufnahmen',voice:'Stimme',open:'Begrüßung',pref:'Einstellungen',cb:'Rückrufe',dnc:'Sperrliste',drive:'Drive',logs:'Ereignisse',
+  dash:'Übersicht',dial:'Anruf',nums:'Nummern',camp:'Kampagne',calls:'Gespräche',recs:'Aufnahmen',voice:'Stimme',lab:'Test',open:'Begrüßung',pref:'Einstellungen',cb:'Rückrufe',dnc:'Sperrliste',drive:'Drive',logs:'Ereignisse',
   gOps:'Betrieb',gLib:'Archiv',gSys:'System',brandSub:'Operations',online:'Online',
   sCalls:'Heute',sActive:'Aktiv',sCamp:'Kampagnen',sAnswered:'Angenommen',hourly:'Anrufe je Stunde',recent:'Letzte Gespräche',activity:'Aktivität',showAll:'Alle',
-  number:'Nummer',callLang:'Gesprächssprache',callBtn:'Anrufen',bulkAdd:'Sammelimport',paste:'Liste',addList:'Übernehmen',leads:'Bestand',dialList:'Auswahl anrufen',name:'Name',parallel:'Parallel',start:'Start',dir:'Richtung',time:'Zeit',save:'Speichern',add:'Hinzufügen',note:'Notiz',uiLang:'Panelsprache',tz:'Zeitzone',clockFmt:'Uhrformat',listen:'Anhören',female:'Weiblich',male:'Männlich',neutral:'Neutral',in:'Eingehend',out:'Ausgehend',pin:'Zugang',selectAll:'Alle',clearList:'Liste leeren',bulkHint:'Eine Nummer pro Zeile. Excel/CSV möglich. 05… Türkei, 0… Deutschland. Duplikate werden übersprungen.',search:'Suche'
+  number:'Nummer',callLang:'Gesprächssprache',callBtn:'Anrufen',bulkAdd:'Sammelimport',paste:'Liste',addList:'Übernehmen',leads:'Bestand',dialList:'Auswahl anrufen',name:'Name',parallel:'Parallel',start:'Start',dir:'Richtung',time:'Zeit',save:'Speichern',add:'Hinzufügen',note:'Notiz',uiLang:'Panelsprache',tz:'Zeitzone',clockFmt:'Uhrformat',listen:'Anhören',female:'Weiblich',male:'Männlich',neutral:'Neutral',in:'Eingehend',out:'Ausgehend',pin:'Zugang',selectAll:'Alle',clearList:'Liste leeren',bulkHint:'Eine Nummer pro Zeile. Excel/CSV möglich. 05… Türkei, 0… Deutschland. Duplikate werden übersprungen.',search:'Suche',labReset:'Zurück',labStart:'Begrüßung',labSend:'Senden',labCust:'Kunde'
 }}
 const ICO={
 dash:'<path d="M3 3h8v8H3zM13 3h8v5h-8zM13 10h8v11h-8zM3 13h8v8H3z"/>',
@@ -269,6 +295,7 @@ camp:'<path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/>',
 calls:'<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>',
 recs:'<path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/>',
 voice:'<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>',
+lab:'<path d="M9 3h6M10 3v6L4 19a2 2 0 0 0 1.7 3h12.6A2 2 0 0 0 20 19L14 9V3"/>',
 open:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
 pref:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9c.3.7 1 1.2 1.8 1.2H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>',
 cb:'<polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>',
@@ -276,7 +303,7 @@ dnc:'<circle cx="12" cy="12" r="10"/><path d="M4.9 4.9l14.2 14.2"/>',
 drive:'<path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>',
 logs:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/>'
 }
-const GROUPS=[{k:'gOps',ids:['dash','dial','nums','camp','calls']},{k:'gLib',ids:['recs','voice','open','cb','dnc']},{k:'gSys',ids:['pref','drive','logs']}]
+const GROUPS=[{k:'gOps',ids:['dash','dial','nums','camp','calls']},{k:'gLib',ids:['recs','voice','lab','open','cb','dnc']},{k:'gSys',ids:['pref','drive','logs']}]
 let ui='tr', tz='Europe/Istanbul', clockFmt='24h', contacts=[]
 const t=k=>(I18N[ui]&&I18N[ui][k])||k
 const loc=()=>ui==='tr'?'tr-TR':'de-DE'
@@ -295,6 +322,7 @@ function applyUi(){
   secretEl.placeholder=t('pin')
   const q=document.getElementById('q'); if(q) q.placeholder=t('search')
   const cq=document.getElementById('cq'); if(cq) cq.placeholder=t('search')
+  const lm=document.getElementById('labMsg'); if(lm) lm.placeholder=t('labCust')
   document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===currentTab))
   document.getElementById('title').textContent=t(currentTab)
   const sub=document.getElementById('subtitle'); if(sub) sub.textContent=tz.replace('_',' ')
@@ -474,6 +502,49 @@ async function loadLogs(){
   document.getElementById('dash-logs').innerHTML=items.slice(0,10).map(l=>`<div class="item"><div><b>${l.message||''}</b><small>${fmt(l.ts)} · ${l.source||''}</small></div></div>`).join('')||'<div class="msg">—</div>'
 }
 async function loadDrive(){const d=await j('/api/drive');document.getElementById('drvtxt').textContent=d.configured?'●':'—'}
+
+let labHist=[]
+function labLang(){return document.getElementById('labLang').value}
+function labFmt(d){
+  const de=labLang()==='de'
+  const spd=d.speed||'1.0x', tone=d.tone||'', emp=d.emphasis||'—', sp=d.speech||''
+  if(de) return `[STIMME]\n- Tempo: ${spd}\n- Tonfall: ${tone}\n- Betonung: ${emp}\n\n[GESPROCHENER TEXT]\n"${sp}"`
+  return `[SES AYARLARI]\n- Hız: ${spd}\n- Tonlama: ${tone}\n- Vurgu: ${emp}\n\n[CANLI KONUŞMA METNİ]\n"${sp}"`
+}
+function labDraw(){
+  const el=document.getElementById('labFeed')
+  el.innerHTML=labHist.map((x,i)=>{
+    if(x.role==='user') return `<div class="lab-turn user">${(x.text||'').replace(/</g,'')}</div>`
+    const idx=i
+    return `<div class="lab-turn agent"><pre class="lab-fmt">${labFmt(x).replace(/</g,'')}</pre><button class="btn ghost" style="margin-top:8px" onclick="labPlay(${idx})">${t('listen')}</button></div>`
+  }).join('')
+  el.scrollTop=el.scrollHeight
+}
+function labReset(){labHist=[];labDraw()}
+async function labStart(){
+  labHist=[]
+  const d=await j('/api/dialog/test',{method:'POST',body:JSON.stringify({lang:labLang(),start:true,history:[]})})
+  labHist.push({role:'agent',...d})
+  labDraw()
+}
+async function labSend(){
+  const inp=document.getElementById('labMsg')
+  const text=(inp.value||'').trim()
+  if(!text)return
+  inp.value=''
+  labHist.push({role:'user',text})
+  labDraw()
+  const hist=labHist.slice(0,-1).map(x=>({role:x.role,text:x.role==='agent'?x.speech:x.text}))
+  const d=await j('/api/dialog/test',{method:'POST',body:JSON.stringify({lang:labLang(),text,history:hist})})
+  labHist.push({role:'agent',...d})
+  labDraw()
+}
+async function labPlay(i){
+  const x=labHist[i]; if(!x||!x.speech)return
+  const r=await fetch('/api/voices/preview',{method:'POST',headers:H(),body:JSON.stringify({text:x.speech,speed:x.speed,lang:labLang()})})
+  if(!r.ok)return
+  const a=document.getElementById('labAudio'); a.src=URL.createObjectURL(await r.blob()); a.play()
+}
 
 applyUi()
 refresh()

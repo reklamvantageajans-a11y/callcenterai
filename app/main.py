@@ -499,30 +499,149 @@ async def api_voice_preview(request: Request):
     if not _require_secret(request):
         return JSONResponse({"error": "unauthorized"}, status_code=401)
     body = await request.json()
-    voice = body.get("voice") or "marin"
+    voice = body.get("voice") or ops_store.get_settings().get("voice") or "marin"
     lang = body.get("lang") or "de"
-    text = (
-        "Guten Tag, mein Name ist Kalmaz. Wie kann ich Ihnen helfen?"
-        if lang != "tr"
-        else "Merhaba, ben Kalmaz. Size nasıl yardımcı olabilirim?"
-    )
+    text = (body.get("text") or "").strip()
+    if not text:
+        text = (
+            "Guten Tag, mein Name ist Kalmaz. Wie kann ich Ihnen helfen?"
+            if lang != "tr"
+            else "Merhaba, ben Kalmaz. Size nasıl yardımcı olabilirim?"
+        )
+    try:
+        speed = float(str(body.get("speed") or "1").replace("x", "").strip())
+    except Exception:
+        speed = 1.0
+    speed = min(1.4, max(0.75, speed))
+    audio, err = await _tts(text, voice, speed)
+    if err:
+        return JSONResponse({"error": err}, status_code=502)
+    return Response(content=audio, media_type="audio/mpeg")
+
+
+async def _tts(text: str, voice: str, speed: float = 1.0):
     import httpx
     key = os.getenv("OPENAI_API_KEY", "")
+    payload = {"model": "gpt-4o-mini-tts", "voice": voice, "input": text, "format": "mp3", "speed": speed}
     async with httpx.AsyncClient(timeout=45) as client:
         r = await client.post(
             "https://api.openai.com/v1/audio/speech",
             headers={"Authorization": f"Bearer {key}"},
-            json={"model": "gpt-4o-mini-tts", "voice": voice, "input": text, "format": "mp3"},
+            json=payload,
         )
         if r.status_code >= 400:
             r = await client.post(
                 "https://api.openai.com/v1/audio/speech",
                 headers={"Authorization": f"Bearer {key}"},
-                json={"model": "tts-1-hd", "voice": "alloy" if voice not in ("alloy", "echo", "fable", "onyx", "nova", "shimmer") else voice, "input": text},
+                json={
+                    "model": "tts-1-hd",
+                    "voice": "alloy" if voice not in ("alloy", "echo", "fable", "onyx", "nova", "shimmer") else voice,
+                    "input": text,
+                    "speed": speed,
+                },
             )
     if r.status_code >= 400:
-        return JSONResponse({"error": "preview failed"}, status_code=502)
-    return Response(content=r.content, media_type="audio/mpeg")
+        return None, "preview failed"
+    return r.content, None
+
+
+def _parse_speed(raw) -> str:
+    try:
+        v = float(str(raw or "1").replace("x", "").strip())
+    except Exception:
+        v = 1.0
+    v = min(1.2, max(0.85, v))
+    return f"{v:.2f}".rstrip("0").rstrip(".") + "x"
+
+
+@app.post("/api/dialog/test")
+async def api_dialog_test(request: Request):
+    if not _require_secret(request):
+        return JSONResponse({"error": "unauthorized"}, status_code=401)
+    body = await request.json()
+    lang = "tr" if body.get("lang") == "tr" else "de"
+    start = bool(body.get("start"))
+    user_text = (body.get("text") or "").strip()
+    history = body.get("history") or []
+    if not start and not user_text:
+        return JSONResponse({"error": "empty"}, status_code=400)
+    from app.services.twilio_bridge import load_prompt
+    settings = ops_store.get_settings()
+    greeting = (settings.get("greetingTr") if lang == "tr" else settings.get("greetingDe") or "").strip()
+    if lang == "tr":
+        fmt = (
+            "TEST ÇIKTISI: Telefon hattında etiket okuma. Yalnızca JSON döndür, markdown yok.\n"
+            '{"speed":"0.95x","tone":"Sıcak","emphasis":"ücretsiz","speech":"..."}\n'
+            "speed 0.85x–1.15x. tone: Sıcak | Meraklı | Düşünceli | Enerjik | Sakin.\n"
+            "emphasis: cümledeki tek odak kelime. speech: kulağa gidecek doğal konuşma, tırnak yok.\n"
+            "Aynı açılışı ve aynı kalıpları tekrarlama."
+        )
+        if start:
+            user_text = "Görüşme yeni başladı. Adım 1 açılışını doğal söyle, ezbere okuma."
+            if greeting:
+                user_text += " Şu açılışı temel al, kelimesi kelimesine okuma: " + greeting
+    else:
+        fmt = (
+            "TEST-AUSGABE: Am Telefon keine Labels vorlesen. Nur JSON, kein Markdown.\n"
+            '{"speed":"0.95x","tone":"Warm","emphasis":"kostenlos","speech":"..."}\n'
+            "speed 0.85x–1.15x. tone: Warm | Neugierig | Nachdenklich | Energetisch | Ruhig.\n"
+            "emphasis: ein Fokuswort. speech: gesprochener Text, ohne Anführungszeichen.\n"
+            "Keine Standardfloskeln wiederholen."
+        )
+        if start:
+            user_text = "Das Gespräch beginnt. Sprich Schritt 1 natürlich, nicht abgelesen."
+            if greeting:
+                user_text += " Nutze diese Begrüßung als Grundlage, nicht wortwörtlich: " + greeting
+    messages = [{"role": "system", "content": load_prompt(lang) + "\n\n" + fmt}]
+    for turn in history[-16:]:
+        role = "assistant" if turn.get("role") == "agent" else "user"
+        content = (turn.get("text") or "").strip()
+        if content:
+            messages.append({"role": role, "content": content})
+    messages.append({"role": "user", "content": user_text})
+    import httpx
+    key = os.getenv("OPENAI_API_KEY", "")
+    async with httpx.AsyncClient(timeout=60) as client:
+        r = await client.post(
+            "https://api.openai.com/v1/chat/completions",
+            headers={"Authorization": f"Bearer {key}"},
+            json={"model": os.getenv("OPENAI_TEXT_MODEL", "gpt-4o-mini"), "temperature": 0.85, "messages": messages},
+        )
+    if r.status_code >= 400:
+        return JSONResponse({"error": "model failed"}, status_code=502)
+    raw = (((r.json() or {}).get("choices") or [{}])[0].get("message") or {}).get("content") or ""
+    data = _parse_dialog_json(raw, lang)
+    data["speed"] = _parse_speed(data.get("speed"))
+    return data
+
+
+def _parse_dialog_json(raw: str, lang: str) -> dict:
+    text = (raw or "").strip()
+    if text.startswith("```"):
+        text = text.strip("`")
+        if text.lower().startswith("json"):
+            text = text[4:].strip()
+    try:
+        start = text.find("{")
+        end = text.rfind("}")
+        if start >= 0 and end > start:
+            obj = json.loads(text[start : end + 1])
+            speech = (obj.get("speech") or obj.get("text") or "").strip()
+            if speech:
+                return {
+                    "speed": obj.get("speed") or "1.0x",
+                    "tone": obj.get("tone") or ("Sıcak" if lang == "tr" else "Warm"),
+                    "emphasis": obj.get("emphasis") or "",
+                    "speech": speech,
+                }
+    except Exception:
+        pass
+    return {
+        "speed": "1.0x",
+        "tone": "Sıcak" if lang == "tr" else "Warm",
+        "emphasis": "",
+        "speech": text.strip('"'),
+    }
 
 
 @app.get("/api/settings")
