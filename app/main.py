@@ -13,7 +13,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.websockets import WebSocketState
 from app.services.openai_voice_service import OpenAIVoiceService
 from app.services.twilio_bridge import TwilioSession, load_prompt
-from app.services import call_store, ops_store, dialer, drive_service
+from app.services import call_store, ops_store, dialer, drive_service, fish_tts
 
 load_dotenv()
 
@@ -485,13 +485,32 @@ VOICES = [
     {"id": "echo", "gender": "male", "label": "Echo"},
     {"id": "cedar", "gender": "male", "label": "Cedar"},
 ]
+_OPENAI_VOICE_IDS = {v["id"] for v in VOICES}
 
 
 @app.get("/api/voices")
 async def api_voices(request: Request):
     if not _require_secret(request):
         return JSONResponse({"error": "unauthorized"}, status_code=401)
-    return {"voices": VOICES, "selected": ops_store.get_settings().get("voice")}
+    settings = ops_store.get_settings()
+    fish_voices = await fish_tts.list_voices() if fish_tts.configured() else []
+    fish_voice = fish_tts.default_voice_id(settings.get("fishVoice") or "")
+    if not fish_voice and fish_voices:
+        fish_voice = fish_voices[0]["id"]
+    provider = settings.get("ttsProvider") or "fish"
+    if provider not in ("fish", "openai"):
+        provider = "fish"
+    if provider == "fish" and not fish_tts.configured():
+        provider = "openai"
+    return {
+        "voices": VOICES,
+        "selected": settings.get("voice"),
+        "ttsProvider": provider,
+        "fishConfigured": fish_tts.configured(),
+        "fishVoices": fish_voices,
+        "fishVoice": fish_voice,
+        "fishModel": fish_tts.default_model() if fish_tts.configured() else "",
+    }
 
 
 @app.post("/api/voices/preview")
@@ -499,7 +518,8 @@ async def api_voice_preview(request: Request):
     if not _require_secret(request):
         return JSONResponse({"error": "unauthorized"}, status_code=401)
     body = await request.json()
-    voice = body.get("voice") or ops_store.get_settings().get("voice") or "marin"
+    settings = ops_store.get_settings()
+    voice = (body.get("voice") or "").strip()
     lang = body.get("lang") or "de"
     text = (body.get("text") or "").strip()
     if not text:
@@ -512,8 +532,25 @@ async def api_voice_preview(request: Request):
         speed = float(str(body.get("speed") or "1").replace("x", "").strip())
     except Exception:
         speed = 1.0
-    speed = min(1.4, max(0.75, speed))
-    audio, err = await _tts(text, voice, speed)
+    provider = (body.get("provider") or "").strip().lower()
+    if provider not in ("fish", "openai"):
+        if voice in _OPENAI_VOICE_IDS:
+            provider = "openai"
+        elif fish_tts.configured() and (settings.get("ttsProvider") or "fish") == "fish":
+            provider = "fish"
+        else:
+            provider = "openai"
+    if provider == "fish" and fish_tts.configured():
+        fid = voice if voice and voice not in _OPENAI_VOICE_IDS else fish_tts.default_voice_id(
+            settings.get("fishVoice") or ""
+        )
+        audio, err = await fish_tts.synthesize(text, fid, speed)
+        if err:
+            return JSONResponse({"error": err}, status_code=502)
+        return Response(content=audio, media_type="audio/mpeg")
+    ov = voice if voice in _OPENAI_VOICE_IDS else (settings.get("voice") or "marin")
+    openai_speed = min(1.4, max(0.75, speed))
+    audio, err = await _tts(text, ov, openai_speed)
     if err:
         return JSONResponse({"error": err}, status_code=502)
     return Response(content=audio, media_type="audio/mpeg")
@@ -648,7 +685,9 @@ def _parse_dialog_json(raw: str, lang: str) -> dict:
 async def api_settings_get(request: Request):
     if not _require_secret(request):
         return JSONResponse({"error": "unauthorized"}, status_code=401)
-    return ops_store.get_settings()
+    data = ops_store.get_settings()
+    data["fishConfigured"] = fish_tts.configured()
+    return data
 
 
 @app.post("/api/settings")

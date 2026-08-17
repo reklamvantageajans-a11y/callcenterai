@@ -123,6 +123,13 @@ export const DICT = {
     labStart: "Açılış",
     labSend: "Gönder",
     labCust: "Müşteri",
+    phoneVoice: "Telefon sesi",
+    phoneVoiceHint: "Canlı arama OpenAI Realtime kullanır. Fish yalnızca Test ve Dinle içindir.",
+    ttsFish: "Fish Audio",
+    ttsOpenAI: "OpenAI",
+    fishHint: "Test diyalogundaki Dinle bu sesi çalar. Almanca ve Türkçe aynı sesten çıkar.",
+    fishOff: "FISH_API_KEY tanımlı değil — Render ortamına ekleyin.",
+    fishOn: "Fish Audio bağlı. Test → Dinle bu motoru kullanır.",
   },
   de: {
     brand: "Kalmaz",
@@ -248,6 +255,13 @@ export const DICT = {
     labStart: "Begrüßung",
     labSend: "Senden",
     labCust: "Kunde",
+    phoneVoice: "Telefonstimme",
+    phoneVoiceHint: "Live-Anrufe laufen über OpenAI Realtime. Fish gilt nur für Test und Anhören.",
+    ttsFish: "Fish Audio",
+    ttsOpenAI: "OpenAI",
+    fishHint: "Anhören im Dialogtest nutzt diese Stimme. Deutsch und Türkisch kommen aus derselben Stimme.",
+    fishOff: "FISH_API_KEY fehlt — in Render als Umgebungsvariable setzen.",
+    fishOn: "Fish Audio verbunden. Test → Anhören nutzt diesen Motor.",
   },
 } as const;
 

@@ -144,6 +144,8 @@ _DEFAULT_SETTINGS = {
     "panelLang": "tr",
     "timezone": "Europe/Istanbul",
     "clockFormat": "24h",
+    "ttsProvider": "fish",
+    "fishVoice": os.getenv("FISH_VOICE_ID", ""),
 }
 
 
