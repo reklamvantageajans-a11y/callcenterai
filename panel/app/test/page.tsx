@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { authHeaders, BACKEND } from "@/lib/backend";
 import { useI18n } from "@/lib/i18n";
 
+type Engine = "fish" | "openai" | "elevenlabs";
 type Voice = { id: string; gender: string; label: string };
 type Turn =
   | { role: "user"; text: string }
@@ -23,32 +24,43 @@ export default function TestPage() {
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
-  const [provider, setProvider] = useState<"fish" | "openai">("fish");
+  const [provider, setProvider] = useState<Engine>("fish");
   const [fishOn, setFishOn] = useState(false);
+  const [elevenOn, setElevenOn] = useState(false);
   const [voices, setVoices] = useState<Voice[]>([]);
   const [fishVoices, setFishVoices] = useState<Voice[]>([]);
+  const [elevenVoices, setElevenVoices] = useState<Voice[]>([]);
   const [openaiVoice, setOpenaiVoice] = useState("");
   const [fishVoice, setFishVoice] = useState("");
+  const [elevenVoice, setElevenVoice] = useState("");
   const audioRef = useRef<HTMLAudioElement>(null);
 
   useEffect(() => {
     fetch(`${BACKEND}/api/voices`, { headers: authHeaders() })
       .then((r) => r.json())
       .then((d) => {
-        const on = !!d.fishConfigured;
-        setFishOn(on);
+        const fish = !!d.fishConfigured;
+        const eleven = !!d.elevenConfigured;
+        setFishOn(fish);
+        setElevenOn(eleven);
         setVoices(d.voices || []);
         setFishVoices(d.fishVoices || []);
+        setElevenVoices(d.elevenVoices || []);
         setOpenaiVoice(d.selected || "");
         setFishVoice(d.fishVoice || d.fishVoices?.[0]?.id || "");
-        setProvider(on && d.ttsProvider !== "openai" ? "fish" : "openai");
+        setElevenVoice(d.elevenVoice || d.elevenVoices?.[0]?.id || "");
+        const p = d.ttsProvider as Engine;
+        if (p === "elevenlabs" && eleven) setProvider("elevenlabs");
+        else if (p === "fish" && fish) setProvider("fish");
+        else if (eleven) setProvider("elevenlabs");
+        else setProvider(fish ? "fish" : "openai");
       });
   }, []);
 
-  const list = provider === "fish" ? fishVoices : voices;
-  const voice = provider === "fish" ? fishVoice : openaiVoice;
+  const list = provider === "elevenlabs" ? elevenVoices : provider === "fish" ? fishVoices : voices;
+  const voice = provider === "elevenlabs" ? elevenVoice : provider === "fish" ? fishVoice : openaiVoice;
 
-  const saveEngine = async (next: "fish" | "openai") => {
+  const saveEngine = async (next: Engine) => {
     setProvider(next);
     await fetch(`${BACKEND}/api/settings`, {
       method: "POST",
@@ -58,12 +70,19 @@ export default function TestPage() {
   };
 
   const saveVoice = async (id: string) => {
-    if (provider === "fish") setFishVoice(id);
+    if (provider === "elevenlabs") setElevenVoice(id);
+    else if (provider === "fish") setFishVoice(id);
     else setOpenaiVoice(id);
+    const body =
+      provider === "elevenlabs"
+        ? { elevenVoice: id, ttsProvider: "elevenlabs" }
+        : provider === "fish"
+          ? { fishVoice: id, ttsProvider: "fish" }
+          : { voice: id, ttsProvider: "openai" };
     await fetch(`${BACKEND}/api/settings`, {
       method: "POST",
       headers: { ...authHeaders(), "Content-Type": "application/json" },
-      body: JSON.stringify(provider === "fish" ? { fishVoice: id, ttsProvider: "fish" } : { voice: id }),
+      body: JSON.stringify(body),
     });
   };
 
@@ -143,8 +162,11 @@ export default function TestPage() {
           <select
             className="rounded-lg border border-border bg-surface2 px-3 py-2 text-sm"
             value={provider}
-            onChange={(e) => saveEngine(e.target.value as "fish" | "openai")}
+            onChange={(e) => saveEngine(e.target.value as Engine)}
           >
+            <option value="elevenlabs" disabled={!elevenOn}>
+              {t("ttsEleven")}
+            </option>
             <option value="fish" disabled={!fishOn}>
               {t("ttsFish")}
             </option>
@@ -174,7 +196,9 @@ export default function TestPage() {
           </button>
         </div>
       </div>
-      <p className="mb-3 text-xs text-muted">{fishOn ? t("fishOn") : t("fishOff")}</p>
+      <p className="mb-3 text-xs text-muted">
+        {provider === "elevenlabs" ? t("elevenOn") : provider === "fish" ? (fishOn ? t("fishOn") : t("fishOff")) : t("phoneVoiceHint")}
+      </p>
       <div className="scrollbar-thin max-h-[52vh] space-y-3 overflow-auto">
         {hist.map((x, i) =>
           x.role === "user" ? (

@@ -146,6 +146,7 @@ _DEFAULT_SETTINGS = {
     "clockFormat": "24h",
     "ttsProvider": "fish",
     "fishVoice": os.getenv("FISH_VOICE_ID", ""),
+    "elevenVoice": os.getenv("ELEVENLABS_VOICE_ID", ""),
 }
 
 

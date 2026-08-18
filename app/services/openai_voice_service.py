@@ -7,12 +7,13 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class OpenAIVoiceService:
-    def __init__(self, api_key: str = None, voice: str = None, system_prompt: str = "", phone_mode: bool = False):
+    def __init__(self, api_key: str = None, voice: str = None, system_prompt: str = "", phone_mode: bool = False, external_tts: bool = False):
         self.api_key = api_key or os.getenv("OPENAI_API_KEY", "")
         self.voice = voice or os.getenv("OPENAI_VOICE", "marin")
         self.model = os.getenv("OPENAI_REALTIME_MODEL", "gpt-realtime")
         self.system_prompt = system_prompt
         self.phone_mode = phone_mode
+        self.external_tts = external_tts
         self.ws = None
         self.is_connected = False
         self.url = f"wss://api.openai.com/v1/realtime?model={self.model}"
@@ -42,33 +43,32 @@ class OpenAIVoiceService:
 
     async def _init_session(self):
         # GA session schema: audio config nested under session.audio.input/output.
+        # external_tts: OpenAI listens + thinks, ElevenLabs (or similar) speaks.
+        audio = {
+            "input": {
+                "format": {"type": "audio/pcm", "rate": 24000},
+                "turn_detection": {
+                    "type": "server_vad",
+                    "threshold": 0.62 if self.phone_mode else 0.5,
+                    "prefix_padding_ms": 400 if self.phone_mode else 300,
+                    "silence_duration_ms": 750 if self.phone_mode else 400,
+                    "create_response": True,
+                    "interrupt_response": not self.phone_mode
+                }
+            }
+        }
+        if not self.external_tts:
+            audio["output"] = {
+                "format": {"type": "audio/pcm", "rate": 24000},
+                "voice": self.voice
+            }
         await self.ws.send(json.dumps({
             "type": "session.update",
             "session": {
                 "type": "realtime",
-                "output_modalities": ["audio"],
+                "output_modalities": ["text"] if self.external_tts else ["audio"],
                 "instructions": self.system_prompt,
-                "audio": {
-                    "input": {
-                        "format": {"type": "audio/pcm", "rate": 24000},
-                        # server_vad restored: steadier turn-taking, fewer false
-                        # interruptions / awkward silences than semantic_vad here.
-                        "turn_detection": {
-                            "type": "server_vad",
-                            "threshold": 0.62 if self.phone_mode else 0.5,
-                            "prefix_padding_ms": 400 if self.phone_mode else 300,
-                            "silence_duration_ms": 750 if self.phone_mode else 400,
-                            "create_response": True,
-                            # Phone lines + Render latency trigger false barge-in;
-                            # don't cut the agent mid-sentence on PSTN.
-                            "interrupt_response": not self.phone_mode
-                        }
-                    },
-                    "output": {
-                        "format": {"type": "audio/pcm", "rate": 24000},
-                        "voice": self.voice
-                    }
-                }
+                "audio": audio,
             }
         }))
         # Input transcription is sent as a separate update so that, if the field

@@ -209,6 +209,12 @@
         <div class="voices" id="vgrid"></div>
       </div>
       <div class="card">
+        <h3 data-i="ttsEleven"></h3>
+        <p class="hint" data-i="elevenHint"></p>
+        <div class="voices" id="egrid"></div>
+        <div class="msg" id="emsg"></div>
+      </div>
+      <div class="card">
         <h3 data-i="ttsFish"></h3>
         <p class="hint" data-i="fishHint"></p>
         <div class="voices" id="fgrid"></div>
@@ -296,13 +302,13 @@ tr:{
   dash:'Özet',dial:'Arama',nums:'Numaralar',camp:'Kampanya',calls:'Görüşmeler',recs:'Kayıtlar',voice:'Ses',lab:'Test',open:'Açılış',pref:'Ayarlar',cb:'Geri arama',dnc:'Yasak liste',drive:'Drive',logs:'Olaylar',
   gOps:'Operasyon',gLib:'Kayıt',gSys:'Sistem',brandSub:'Operations',online:'Çevrimiçi',
   sCalls:'Bugün',sActive:'Aktif hat',sCamp:'Kampanya',sAnswered:'Açılan',hourly:'Saatlik dağılım',recent:'Son görüşmeler',activity:'Canlı akış',showAll:'Tümü',
-  number:'Numara',callLang:'Görüşme dili',callBtn:'Ara',bulkAdd:'Toplu ekle',paste:'Liste',addList:'Rehbere ekle',leads:'Rehber',dialList:'Seçilenleri ara',name:'Ad',parallel:'Paralel',start:'Başlat',dir:'Yön',time:'Saat',save:'Kaydet',add:'Ekle',note:'Not',uiLang:'Panel dili',tz:'Saat dilimi',clockFmt:'Saat biçimi',listen:'Dinle',female:'Kadın',male:'Erkek',neutral:'Nötr',in:'Gelen',out:'Giden',pin:'Giriş',selectAll:'Tümünü seç',clearList:'Listeyi sil',bulkHint:'Her satıra bir numara. Excel/CSV yapıştırılabilir. 05… Türkiye, 0… Almanya olarak tamamlanır. Yinelenenler atlanır.',search:'Ara',labReset:'Sıfırla',labStart:'Açılış',labSend:'Gönder',labCust:'Müşteri',phoneVoice:'Telefon sesi',phoneVoiceHint:'Canlı arama OpenAI Realtime kullanır. Fish yalnızca Test ve Dinle içindir.',ttsFish:'Fish Audio',ttsOpenAI:'OpenAI',fishHint:'Test diyalogundaki Dinle bu sesi çalar. Almanca ve Türkçe aynı sesten çıkar.',fishOff:'FISH_API_KEY tanımlı değil — Render ortamına ekleyin.',fishOn:'Fish Audio bağlı. Test → Dinle bu motoru kullanır.'
+  number:'Numara',callLang:'Görüşme dili',callBtn:'Ara',bulkAdd:'Toplu ekle',paste:'Liste',addList:'Rehbere ekle',leads:'Rehber',dialList:'Seçilenleri ara',name:'Ad',parallel:'Paralel',start:'Başlat',dir:'Yön',time:'Saat',save:'Kaydet',add:'Ekle',note:'Not',uiLang:'Panel dili',tz:'Saat dilimi',clockFmt:'Saat biçimi',listen:'Dinle',female:'Kadın',male:'Erkek',neutral:'Nötr',in:'Gelen',out:'Giden',pin:'Giriş',selectAll:'Tümünü seç',clearList:'Listeyi sil',bulkHint:'Her satıra bir numara. Excel/CSV yapıştırılabilir. 05… Türkiye, 0… Almanya olarak tamamlanır. Yinelenenler atlanır.',search:'Ara',labReset:'Sıfırla',labStart:'Açılış',labSend:'Gönder',labCust:'Müşteri',phoneVoice:'Telefon sesi',phoneVoiceHint:'Marin seçilirse canlı hat OpenAI sesidir. ElevenLabs seçilirse telefon da o sesle konuşur. Fish yalnızca Test içindir.',ttsFish:'Fish Audio',ttsOpenAI:'OpenAI',ttsEleven:'ElevenLabs',fishHint:'Test diyalogundaki Dinle bu sesi çalar. Canlı aramayı değiştirmez.',fishOff:'FISH_API_KEY tanımlı değil — Render ortamına ekleyin.',fishOn:'Fish Audio bağlı. Yalnızca Test → Dinle.',elevenHint:'Seçilirse canlı telefon da bu sesle konuşur. OpenAI dinler, ElevenLabs konuşur.',elevenOff:'ELEVENLABS_API_KEY tanımlı değil — Render ortamına ekleyin.',elevenOn:'ElevenLabs bağlı. Test ve canlı arama bu sesi kullanır.'
 },
 de:{
   dash:'Übersicht',dial:'Anruf',nums:'Nummern',camp:'Kampagne',calls:'Gespräche',recs:'Aufnahmen',voice:'Stimme',lab:'Test',open:'Begrüßung',pref:'Einstellungen',cb:'Rückrufe',dnc:'Sperrliste',drive:'Drive',logs:'Ereignisse',
   gOps:'Betrieb',gLib:'Archiv',gSys:'System',brandSub:'Operations',online:'Online',
   sCalls:'Heute',sActive:'Aktiv',sCamp:'Kampagnen',sAnswered:'Angenommen',hourly:'Anrufe je Stunde',recent:'Letzte Gespräche',activity:'Aktivität',showAll:'Alle',
-  number:'Nummer',callLang:'Gesprächssprache',callBtn:'Anrufen',bulkAdd:'Sammelimport',paste:'Liste',addList:'Übernehmen',leads:'Bestand',dialList:'Auswahl anrufen',name:'Name',parallel:'Parallel',start:'Start',dir:'Richtung',time:'Zeit',save:'Speichern',add:'Hinzufügen',note:'Notiz',uiLang:'Panelsprache',tz:'Zeitzone',clockFmt:'Uhrformat',listen:'Anhören',female:'Weiblich',male:'Männlich',neutral:'Neutral',in:'Eingehend',out:'Ausgehend',pin:'Zugang',selectAll:'Alle',clearList:'Liste leeren',bulkHint:'Eine Nummer pro Zeile. Excel/CSV möglich. 05… Türkei, 0… Deutschland. Duplikate werden übersprungen.',search:'Suche',labReset:'Zurück',labStart:'Begrüßung',labSend:'Senden',labCust:'Kunde',phoneVoice:'Telefonstimme',phoneVoiceHint:'Live-Anrufe laufen über OpenAI Realtime. Fish gilt nur für Test und Anhören.',ttsFish:'Fish Audio',ttsOpenAI:'OpenAI',fishHint:'Anhören im Dialogtest nutzt diese Stimme. Deutsch und Türkisch kommen aus derselben Stimme.',fishOff:'FISH_API_KEY fehlt — in Render als Umgebungsvariable setzen.',fishOn:'Fish Audio verbunden. Test → Anhören nutzt diesen Motor.'
+  number:'Nummer',callLang:'Gesprächssprache',callBtn:'Anrufen',bulkAdd:'Sammelimport',paste:'Liste',addList:'Übernehmen',leads:'Bestand',dialList:'Auswahl anrufen',name:'Name',parallel:'Parallel',start:'Start',dir:'Richtung',time:'Zeit',save:'Speichern',add:'Hinzufügen',note:'Notiz',uiLang:'Panelsprache',tz:'Zeitzone',clockFmt:'Uhrformat',listen:'Anhören',female:'Weiblich',male:'Männlich',neutral:'Neutral',in:'Eingehend',out:'Ausgehend',pin:'Zugang',selectAll:'Alle',clearList:'Liste leeren',bulkHint:'Eine Nummer pro Zeile. Excel/CSV möglich. 05… Türkei, 0… Deutschland. Duplikate werden übersprungen.',search:'Suche',labReset:'Zurück',labStart:'Begrüßung',labSend:'Senden',labCust:'Kunde',phoneVoice:'Telefonstimme',phoneVoiceHint:'Marin = Live OpenAI-Stimme. ElevenLabs = das Telefon spricht mit dieser Stimme. Fish nur für den Test.',ttsFish:'Fish Audio',ttsOpenAI:'OpenAI',ttsEleven:'ElevenLabs',fishHint:'Anhören im Dialogtest nutzt diese Stimme. Live-Anrufe bleiben unverändert.',fishOff:'FISH_API_KEY fehlt — in Render als Umgebungsvariable setzen.',fishOn:'Fish Audio verbunden. Nur Test → Anhören.',elevenHint:'Wenn ausgewählt, spricht das Telefon mit dieser Stimme. OpenAI hört zu, ElevenLabs spricht.',elevenOff:'ELEVENLABS_API_KEY fehlt — in Render als Umgebungsvariable setzen.',elevenOn:'ElevenLabs verbunden. Test und Live-Anruf nutzen diese Stimme.'
 }}
 const ICO={
 dash:'<path d="M3 3h8v8H3zM13 3h8v5h-8zM13 10h8v11h-8zM3 13h8v8H3z"/>',
@@ -469,29 +475,27 @@ async function loadCamps(){
     return `<div style="margin-bottom:16px"><div style="display:flex;justify-content:space-between"><b>${c.name}</b><span class="msg">${c.status} · ${c.done||0}/${c.total} · ${fmt(c.createdAt)}</span></div><div class="bar"><i style="width:${pct}%"></i></div>${(c.numbers||[]).slice(0,40).map(n=>`<div class="msg">${n.phone} · ${n.status}</div>`).join('')}</div>`
   }).join('')
 }
-let voiceMeta={ttsProvider:'openai',fishConfigured:false,fishVoices:[],fishVoice:'',voices:[]}
+let voiceMeta={ttsProvider:'openai',fishConfigured:false,fishVoices:[],fishVoice:'',elevenConfigured:false,elevenVoices:[],elevenVoice:'',voices:[]}
 function genderLabel(g){return t(g==='female'?'female':g==='male'?'male':'neutral')}
+function renderVoiceGrid(el,list,sel,provider,pickFn){
+  el.innerHTML=(list||[]).map(v=>`<div class="vc ${v.id===sel?'on':''}" onclick="${pickFn}('${v.id}')"><div style="font-weight:650">${v.label}</div><div class="g">${genderLabel(v.gender)}</div><button class="btn ghost" style="margin-top:8px;width:100%" onclick="event.stopPropagation();preview('${v.id}','${provider}')">${t('listen')}</button></div>`).join('')||'<div class="msg">—</div>'
+}
 async function loadVoice(){
   const d=await j('/api/voices')
   voiceMeta=d
   const sel=d.selected
-  document.getElementById('vgrid').innerHTML=(d.voices||[]).map(v=>`<div class="vc ${v.id===sel?'on':''}" onclick="pickVoice('${v.id}')"><div style="font-weight:650">${v.label}</div><div class="g">${genderLabel(v.gender)}</div><button class="btn ghost" style="margin-top:8px;width:100%" onclick="event.stopPropagation();preview('${v.id}','openai')">${t('listen')}</button></div>`).join('')
-  const fgrid=document.getElementById('fgrid')
-  const fmsg=document.getElementById('fmsg')
-  if(!d.fishConfigured){
-    fgrid.innerHTML=''
-    fmsg.className='msg err'
-    fmsg.textContent=t('fishOff')
-  }else{
-    fmsg.className='msg good'
-    fmsg.textContent=t('fishOn')
-    const fsel=d.fishVoice
-    fgrid.innerHTML=(d.fishVoices||[]).map(v=>`<div class="vc ${v.id===fsel?'on':''}" onclick="pickFish('${v.id}')"><div style="font-weight:650">${v.label}</div><div class="g">${genderLabel(v.gender)}</div><button class="btn ghost" style="margin-top:8px;width:100%" onclick="event.stopPropagation();preview('${v.id}','fish')">${t('listen')}</button></div>`).join('')||'<div class="msg">—</div>'
-  }
+  document.getElementById('vgrid').innerHTML=(d.voices||[]).map(v=>`<div class="vc ${v.id===sel&&d.ttsProvider!=='elevenlabs'?'on':''}" onclick="pickVoice('${v.id}')"><div style="font-weight:650">${v.label}</div><div class="g">${genderLabel(v.gender)}</div><button class="btn ghost" style="margin-top:8px;width:100%" onclick="event.stopPropagation();preview('${v.id}','openai')">${t('listen')}</button></div>`).join('')
+  const egrid=document.getElementById('egrid'), emsg=document.getElementById('emsg')
+  if(!d.elevenConfigured){egrid.innerHTML='';emsg.className='msg err';emsg.textContent=t('elevenOff')}
+  else {emsg.className='msg good';emsg.textContent=t('elevenOn');renderVoiceGrid(egrid,d.elevenVoices,d.elevenVoice,'elevenlabs','pickEleven')}
+  const fgrid=document.getElementById('fgrid'), fmsg=document.getElementById('fmsg')
+  if(!d.fishConfigured){fgrid.innerHTML='';fmsg.className='msg err';fmsg.textContent=t('fishOff')}
+  else {fmsg.className='msg good';fmsg.textContent=t('fishOn');renderVoiceGrid(fgrid,d.fishVoices,d.fishVoice,'fish','pickFish')}
   fillLabTts()
 }
-async function pickVoice(id){await j('/api/settings',{method:'POST',body:JSON.stringify({voice:id})});loadVoice()}
+async function pickVoice(id){await j('/api/settings',{method:'POST',body:JSON.stringify({voice:id,ttsProvider:'openai'})});loadVoice()}
 async function pickFish(id){await j('/api/settings',{method:'POST',body:JSON.stringify({fishVoice:id,ttsProvider:'fish'})});loadVoice()}
+async function pickEleven(id){await j('/api/settings',{method:'POST',body:JSON.stringify({elevenVoice:id,ttsProvider:'elevenlabs'})});loadVoice()}
 async function preview(id,provider){
   const r=await fetch('/api/voices/preview',{method:'POST',headers:H(),body:JSON.stringify({voice:id,provider,lang:document.getElementById('lang').value})})
   const msg=document.getElementById('vmsg')
@@ -505,15 +509,18 @@ function fillLabTts(){
   const hint=document.getElementById('labHint')
   if(!eng)return
   const fishOn=!!voiceMeta.fishConfigured
-  const provider=fishOn&&(voiceMeta.ttsProvider||'fish')==='fish'?'fish':'openai'
-  eng.innerHTML=`<option value="fish"${fishOn?'':' disabled'}>${t('ttsFish')}</option><option value="openai">${t('ttsOpenAI')}</option>`
+  const elevenOn=!!voiceMeta.elevenConfigured
+  let provider=voiceMeta.ttsProvider||'fish'
+  if(provider==='elevenlabs'&&!elevenOn) provider=fishOn?'fish':'openai'
+  if(provider==='fish'&&!fishOn) provider='openai'
+  eng.innerHTML=`<option value="elevenlabs"${elevenOn?'':' disabled'}>${t('ttsEleven')}</option><option value="fish"${fishOn?'':' disabled'}>${t('ttsFish')}</option><option value="openai">${t('ttsOpenAI')}</option>`
   eng.value=provider
-  const list=provider==='fish'?(voiceMeta.fishVoices||[]):(voiceMeta.voices||[])
-  const cur=provider==='fish'?voiceMeta.fishVoice:voiceMeta.selected
+  const list=provider==='elevenlabs'?(voiceMeta.elevenVoices||[]):provider==='fish'?(voiceMeta.fishVoices||[]):(voiceMeta.voices||[])
+  const cur=provider==='elevenlabs'?voiceMeta.elevenVoice:provider==='fish'?voiceMeta.fishVoice:voiceMeta.selected
   voc.innerHTML=list.map(v=>`<option value="${v.id}">${v.label}</option>`).join('')
   if(cur) voc.value=cur
   voc.style.display=list.length?'':'none'
-  if(hint) hint.textContent=fishOn?t('fishOn'):t('fishOff')
+  if(hint) hint.textContent=provider==='elevenlabs'?t('elevenOn'):provider==='fish'?t('fishOn'):t('phoneVoiceHint')
 }
 async function labEngineChange(){
   const provider=document.getElementById('labEngine').value
@@ -524,8 +531,9 @@ async function labEngineChange(){
 async function labVoiceChange(){
   const provider=document.getElementById('labEngine').value
   const id=document.getElementById('labVoice').value
-  if(provider==='fish'){await j('/api/settings',{method:'POST',body:JSON.stringify({fishVoice:id,ttsProvider:'fish'})});voiceMeta.fishVoice=id}
-  else {await j('/api/settings',{method:'POST',body:JSON.stringify({voice:id})});voiceMeta.selected=id}
+  if(provider==='elevenlabs'){await j('/api/settings',{method:'POST',body:JSON.stringify({elevenVoice:id,ttsProvider:'elevenlabs'})});voiceMeta.elevenVoice=id}
+  else if(provider==='fish'){await j('/api/settings',{method:'POST',body:JSON.stringify({fishVoice:id,ttsProvider:'fish'})});voiceMeta.fishVoice=id}
+  else {await j('/api/settings',{method:'POST',body:JSON.stringify({voice:id,ttsProvider:'openai'})});voiceMeta.selected=id}
 }
 async function loadOpen(){
   const s=await j('/api/settings')

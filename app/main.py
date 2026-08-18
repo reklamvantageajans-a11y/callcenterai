@@ -13,7 +13,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.websockets import WebSocketState
 from app.services.openai_voice_service import OpenAIVoiceService
 from app.services.twilio_bridge import TwilioSession, load_prompt
-from app.services import call_store, ops_store, dialer, drive_service, fish_tts
+from app.services import call_store, ops_store, dialer, drive_service, fish_tts, elevenlabs_tts
 
 load_dotenv()
 
@@ -497,9 +497,15 @@ async def api_voices(request: Request):
     fish_voice = fish_tts.default_voice_id(settings.get("fishVoice") or "")
     if not fish_voice and fish_voices:
         fish_voice = fish_voices[0]["id"]
+    eleven_voices = await elevenlabs_tts.list_voices() if elevenlabs_tts.configured() else []
+    eleven_voice = elevenlabs_tts.default_voice_id(settings.get("elevenVoice") or "")
+    if not eleven_voice and eleven_voices:
+        eleven_voice = eleven_voices[0]["id"]
     provider = settings.get("ttsProvider") or "fish"
-    if provider not in ("fish", "openai"):
+    if provider not in ("fish", "openai", "elevenlabs"):
         provider = "fish"
+    if provider == "elevenlabs" and not elevenlabs_tts.configured():
+        provider = "fish" if fish_tts.configured() else "openai"
     if provider == "fish" and not fish_tts.configured():
         provider = "openai"
     return {
@@ -510,6 +516,10 @@ async def api_voices(request: Request):
         "fishVoices": fish_voices,
         "fishVoice": fish_voice,
         "fishModel": fish_tts.default_model() if fish_tts.configured() else "",
+        "elevenConfigured": elevenlabs_tts.configured(),
+        "elevenVoices": eleven_voices,
+        "elevenVoice": eleven_voice,
+        "elevenModel": elevenlabs_tts.default_model() if elevenlabs_tts.configured() else "",
     }
 
 
@@ -533,13 +543,23 @@ async def api_voice_preview(request: Request):
     except Exception:
         speed = 1.0
     provider = (body.get("provider") or "").strip().lower()
-    if provider not in ("fish", "openai"):
+    if provider not in ("fish", "openai", "elevenlabs"):
         if voice in _OPENAI_VOICE_IDS:
             provider = "openai"
+        elif elevenlabs_tts.configured() and (settings.get("ttsProvider") or "") == "elevenlabs":
+            provider = "elevenlabs"
         elif fish_tts.configured() and (settings.get("ttsProvider") or "fish") == "fish":
             provider = "fish"
         else:
             provider = "openai"
+    if provider == "elevenlabs" and elevenlabs_tts.configured():
+        eid = voice if voice and voice not in _OPENAI_VOICE_IDS else elevenlabs_tts.default_voice_id(
+            settings.get("elevenVoice") or ""
+        )
+        audio, err = await elevenlabs_tts.synthesize(text, eid, speed)
+        if err:
+            return JSONResponse({"error": err}, status_code=502)
+        return Response(content=audio, media_type="audio/mpeg")
     if provider == "fish" and fish_tts.configured():
         fid = voice if voice and voice not in _OPENAI_VOICE_IDS else fish_tts.default_voice_id(
             settings.get("fishVoice") or ""
@@ -687,6 +707,7 @@ async def api_settings_get(request: Request):
         return JSONResponse({"error": "unauthorized"}, status_code=401)
     data = ops_store.get_settings()
     data["fishConfigured"] = fish_tts.configured()
+    data["elevenConfigured"] = elevenlabs_tts.configured()
     return data
 
 
