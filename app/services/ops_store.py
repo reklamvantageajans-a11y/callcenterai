@@ -138,7 +138,7 @@ _DEFAULT_SETTINGS = {
     "voice": os.getenv("OPENAI_VOICE", "marin"),
     "lang": "de",
     "agentName": "Kalmaz",
-    "greetingDe": "Einen wunderschönen guten Tag, mein Name ist Kalmaz vom Verbund der Privat Krankenversicherten. Ich fass mich kurz: gesetzliche und private Kassen erhöhen demnächst wieder die Beiträge. Unser Experte erstellt Ihnen kostenlos und unverbindlich eine Vergleichsanalyse. Wäre das was für Sie?",
+    "greetingDe": "Einen wunderschönen guten Tag, mein Name ist Kalmaz vom Verbund der Privat Krankenversicherten. Ich fass mich kurz und komm direkt zum Punkt. Unser Experte bietet aktuell eine kostenlose und unverbindliche Vergleichsanalyse für die private Krankenversicherung an. Dabei schauen wir einfach, ob sich beim Beitrag oder bei den Leistungen etwas verbessern lässt. Wäre das grundsätzlich interessant für Sie?",
     "greetingTr": "İyi günler, ben Kalmaz, Özel Sağlık Sigortacıları Birliği'nden arıyorum. Kısa keseceğim: SGK ve özel sağlık sigortaları yakında prim artışı yapacak. Uzmanımız ücretsiz ve bağlayıcı olmayan bir karşılaştırma hazırlayabilir. Uygun olur mu?",
     "maxConcurrent": 2,
     "panelLang": "tr",
